@@ -75,13 +75,30 @@ while game.players_alive > 1:
         turn = turn % game.player_count
         continue
 
-    # add funcionality for double rolls and jail
     roll_count = 0
     roll, double = game.dice_roll(0)
     if roll == -1:
         curr_player.go_to_jail()
+        double = False
         # build properties
         continue
+
+    if curr_player.imprisoned:
+        if not double:
+            if curr_player.jail_card > 0:
+                curr_player.jail_card -= 1
+            else:
+                if curr_player.money > 50:
+                    curr_player.money -= 50
+                else:
+                    if curr_player.imprisoned_count == 2:
+                        # debt
+                        curr_player.money -= 50
+                    else:
+                        curr_player.imprisoned_count += 1
+                        continue
+        curr_player.imprisoned = False
+        curr_player.imprisoned_count = 0
 
     
 
@@ -90,6 +107,7 @@ while game.players_alive > 1:
         if curr_player.location == bd.Go:
             curr_player += 200
 
+    #check for mortage
     if curr_player.location.set == 'Special':
         if curr_player.location == bd.Go or curr_player.location == bd.Free_Parking or (curr_player.location == bd.Jail and not curr_player.imprisoned):
             continue
@@ -111,7 +129,7 @@ while game.players_alive > 1:
             curr_player.money -= 100
     elif not curr_player.location.owner:
         if curr_player.money >= curr_player.location.cost:
-            curr_player.buy(curr_player.location)
+            curr_player.buy(curr_player.location) # check for monopoly
     else:
         if curr_player.location.set == 'Utilites':
             if curr_player.location.whole_set:
@@ -148,8 +166,8 @@ while game.players_alive > 1:
     
     # build properties
 
-
-    turn += 1
+    if not double:
+        turn += 1
     turn = turn % game.player_count
 
 

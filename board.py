@@ -23,18 +23,6 @@ class Board:
         if not self.unowned:
             self.unowned = False
 
-    def morgated(self):
-        self.mortaged = True
-    
-    def un_mortaged(self):
-        self.mortage = False
-
-    def monopoly(self):
-        self.monopoly = True
-
-    def monopoly_break(self):
-        self.monopoly = False
-        
 
 def create_board():
     Go = Board(None, 'Special')
