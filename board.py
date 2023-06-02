@@ -1,5 +1,6 @@
 import player as pl
 
+# need to include total number of houses and hotels 
 class Board:
     def __init__(self, next, set, cost, rent, cost_of_house, one_house, two_houses, three_houses, four_houses, hotel):
         self.cost = cost

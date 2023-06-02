@@ -92,7 +92,10 @@ while game.players_alive > 1:
                     curr_player.money -= 50
                 else:
                     if curr_player.imprisoned_count == 2:
-                        # debt
+                        if not curr_player.debt(): 
+                            game.dead_players.add(curr_player)
+                            double = False
+                            curr_player.bankrupt()
                         curr_player.money -= 50
                     else:
                         curr_player.imprisoned_count += 1

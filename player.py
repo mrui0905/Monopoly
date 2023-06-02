@@ -21,6 +21,7 @@ class Player:
     def go_to_jail(self):
         self.location = bd.Jail
         self.imprisoned = True
+        return
 
     def buy(self, property):
         self.money -= property.cost
@@ -28,9 +29,34 @@ class Player:
         property.owner = self
         if property.set == 'RR':
             self.rr += 1
-
-    def bankrupt(self):
         return
+
+    def bankrupt(self, debtor='Bank'):
+        if debtor == 'Bank':
+            for property in self.properties:
+                property.owner = None
+                property.unowned = True
+                property.mortaged = False
+                property.whole_set = False
+                property.num_houses = 0
+        else:
+            for property in self.properties:
+                property.owner = debtor
+                property.whole_set = False
+                property.num_houses = 0
+                # update whole_set attribute
+            debtor.jail_card += self.jail_card
+            debtor.money += self.money
+
+        self.location = None
+        self.money = 0
+        self.properties = set()
+        self.jail_card = 0
+        self.imprisoned = False
+        self.imprisoned_count = 0
+        self.rr = 0
+        return
+
 
     def debt(self, amount):
         not_monopoly = set()
@@ -53,10 +79,10 @@ class Player:
             elif j < len(lst_is_monopoly):
                 lst_is_monopoly[j].mortaged = True
                 self.money += lst_is_monopoly[j].cost // 2
-            else:
-                self.bankrupt()
         
-        return
+        #liquidate houses and hotels as well
+        
+        return self.money > amount
 
 
 
