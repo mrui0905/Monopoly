@@ -75,45 +75,68 @@ while game.players_alive > 1:
         turn = turn % game.player_count
         continue
 
+    # add funcionality for double rolls and jail
     roll_count = 0
     roll, double = game.dice_roll(0)
     if roll == -1:
-        #send plasyer to jail
-        pass
+        curr_player.go_to_jail()
+        # build properties
+        continue
 
-    curr_location = curr_player.location
+    
 
     for _ in range(roll):
-        curr_location = curr_location.next
-        if curr_location == bd.Go:
+        curr_player.location = curr_player.location.next
+        if curr_player.location == bd.Go:
             curr_player += 200
 
-    if curr_location.set == 'Special':
-        # case-by-case property
-        pass
-    elif not curr_location.owner:
-        # prompt to buy
-        pass
+    if curr_player.location.set == 'Special':
+        if curr_player.location == bd.Go or curr_player.location == bd.Free_Parking or (curr_player.location == bd.Jail and not curr_player.imprisoned):
+            continue
+        if curr_player.location == bd.Community_Chest_One or curr_player.location == bd.Community_Chest_Two or curr_player.location == bd.Community_Chest_Three:
+            #community_chest()
+            pass
+        if curr_player.location == bd.Chance_One or curr_player.location == bd.Chance_Two or curr_player.location == bd.Chance_Three:
+            #chance()
+            pass
+        if curr_player.location == bd.Income_Tax:
+            if curr_player.money < 200:
+                # debt
+                pass
+            curr_player.money -= 200
+        if curr_player.location == bd.Luxury_Tax:
+            if curr_player.money < 100:
+                # debt
+                pass
+            curr_player.money -= 100
+    elif not curr_player.location.owner:
+        if curr_player.money >= curr_player.location.cost:
+            curr_player.buy(curr_player.location)
     else:
-        #ADD: check for utilites
-        owner = curr_location.owner
-        if curr_location.whole_set:
-            if curr_location.num_houses == 0:
-                rent = curr_location.rent * 2
-            elif curr_location.num_houses == 1:
-                rent = curr_location.one_house
-            elif curr_location.num_houses == 2:
-                rent = curr_location.two_houses
-            elif curr_location.num_houses == 3:
-                rent = curr_location.three_houses
-            elif curr_location.num_houses == 4:
-                rent = curr_location.four_houses
+        if curr_player.location.set == 'Utilites':
+            if curr_player.location.whole_set:
+                rent = roll * 10
             else:
-                rent = curr_location.hotel
+                rent = roll * 4
+        elif curr_player.location.set == 'RR':
+            rent = curr_player.rr * curr_player.location.rent
+        elif curr_player.location.whole_set:
+            if curr_player.location.num_houses == 0:
+                rent = curr_player.location.rent * 2
+            elif curr_player.location.num_houses == 1:
+                rent = curr_player.location.one_house
+            elif curr_player.location.num_houses == 2:
+                rent = curr_player.location.two_houses
+            elif curr_player.location.num_houses == 3:
+                rent = curr_player.location.three_houses
+            elif curr_player.location.num_houses == 4:
+                rent = curr_player.location.four_houses
+            else:
+                rent = curr_player.location.hotel
         else:
-            rent = curr_location.rent
-        if not curr_player.pay_to(owner, rent):
-            # pay debts
+            rent = curr_player.location.rent
+        if not curr_player.pay_to(curr_player.location.owner, rent):
+            # debts
             pass
     
 
