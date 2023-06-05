@@ -12,6 +12,10 @@ class Game:
         self.dead_players = set()
         self.turn_order = []
 
+        self.hotels = 0
+        self.houses = 0
+        self.total_turns = 0
+
         player_one = pl.Player()
         player_two = pl.Player()
         self.players.add(player_one)
@@ -61,121 +65,123 @@ class Game:
         return first_player_index
     
 
-print('Welcome to Monopoly!')
+if __name__ == '__main__':
+    print('Welcome to Monopoly!')
 
-game = Game()
+    game = Game()
 
-turn = game.determine_order_of_play
+    turn = game.determine_order_of_play
 
-while game.players_alive > 1:
-    curr_player = game.turn_order[turn]
+    while game.players_alive > 1:
+        curr_player = game.turn_order[turn]
 
-    if curr_player in game.dead_players:
-        turn += 1
-        turn = turn % game.player_count
-        continue
+        if curr_player in game.dead_players:
+            turn += 1
+            turn = turn % game.player_count
+            continue
 
-    roll_count = 0
-    roll, double = game.dice_roll(0)
-    if roll == -1:
-        curr_player.go_to_jail()
-        double = False
-        # build properties
-        continue
+        roll_count = 0
+        roll, double = game.dice_roll(0)
+        if roll == -1:
+            curr_player.go_to_jail()
+            double = False
+            # build properties
+            continue
 
-    if curr_player.imprisoned:
-        if not double:
-            if curr_player.jail_card > 0:
-                curr_player.jail_card -= 1
-            else:
-                if curr_player.money > 50:
-                    curr_player.money -= 50
+        if curr_player.imprisoned:
+            if not double:
+                if curr_player.jail_card > 0:
+                    curr_player.jail_card -= 1
                 else:
-                    if curr_player.imprisoned_count == 2:
-                        if not curr_player.debt(): 
-                            game.dead_players.add(curr_player)
-                            double = False
-                            curr_player.bankrupt()
+                    if curr_player.money > 50:
                         curr_player.money -= 50
                     else:
-                        curr_player.imprisoned_count += 1
-                        continue
-        curr_player.imprisoned = False
-        curr_player.imprisoned_count = 0
+                        if curr_player.imprisoned_count == 2:
+                            if not curr_player.debt(): 
+                                game.dead_players.add(curr_player)
+                                double = False
+                                curr_player.bankrupt()
+                            curr_player.money -= 50
+                        else:
+                            curr_player.imprisoned_count += 1
+                            continue
+            curr_player.imprisoned = False
+            curr_player.imprisoned_count = 0
 
-    
+        
 
-    for _ in range(roll):
-        curr_player.location = curr_player.location.next
-        if curr_player.location == bd.Go:
-            curr_player += 200
+        for _ in range(roll):
+            curr_player.location = curr_player.location.next
+            if curr_player.location == bd.Go:
+                curr_player += 200
 
-    #check for mortage
-    if curr_player.location.set == 'Special':
-        if curr_player.location == bd.Go or curr_player.location == bd.Free_Parking or (curr_player.location == bd.Jail and not curr_player.imprisoned):
-            continue
-        if curr_player.location == bd.Community_Chest_One or curr_player.location == bd.Community_Chest_Two or curr_player.location == bd.Community_Chest_Three:
-            #community_chest()
-            pass
-        if curr_player.location == bd.Chance_One or curr_player.location == bd.Chance_Two or curr_player.location == bd.Chance_Three:
-            #chance()
-            pass
-        if curr_player.location == bd.Income_Tax:
-            if curr_player.money < 200:
-                # debt
+        #check for mortage
+        if curr_player.location.set == 'Special':
+            if curr_player.location == bd.Go or curr_player.location == bd.Free_Parking or (curr_player.location == bd.Jail and not curr_player.imprisoned):
+                continue
+            if curr_player.location == bd.Community_Chest_One or curr_player.location == bd.Community_Chest_Two or curr_player.location == bd.Community_Chest_Three:
+                #community_chest()
                 pass
-            curr_player.money -= 200
-        if curr_player.location == bd.Luxury_Tax:
-            if curr_player.money < 100:
-                # debt
+            if curr_player.location == bd.Chance_One or curr_player.location == bd.Chance_Two or curr_player.location == bd.Chance_Three:
+                #chance()
                 pass
-            curr_player.money -= 100
-    elif not curr_player.location.owner:
-        if curr_player.money >= curr_player.location.cost:
-            curr_player.buy(curr_player.location) # check for monopoly
-    else:
-        if curr_player.location.set == 'Utilites':
-            if curr_player.location.whole_set:
-                rent = roll * 10
-            else:
-                rent = roll * 4
-        elif curr_player.location.set == 'RR':
-            rent = curr_player.rr * curr_player.location.rent
-        elif curr_player.location.whole_set:
-            if curr_player.location.num_houses == 0:
-                rent = curr_player.location.rent * 2
-            elif curr_player.location.num_houses == 1:
-                rent = curr_player.location.one_house
-            elif curr_player.location.num_houses == 2:
-                rent = curr_player.location.two_houses
-            elif curr_player.location.num_houses == 3:
-                rent = curr_player.location.three_houses
-            elif curr_player.location.num_houses == 4:
-                rent = curr_player.location.four_houses
-            else:
-                rent = curr_player.location.hotel
+            if curr_player.location == bd.Income_Tax:
+                if curr_player.money < 200:
+                    if not curr_player.debt(200): 
+                        game.dead_players.add(curr_player)
+                        double = False
+                        curr_player.bankrupt()
+                curr_player.money -= 200
+            if curr_player.location == bd.Luxury_Tax:
+                if curr_player.money < 100:
+                    if not curr_player.debt(100): 
+                        game.dead_players.add(curr_player)
+                        double = False
+                        curr_player.bankrupt()
+                curr_player.money -= 100
+        elif not curr_player.location.owner:
+            if curr_player.money >= curr_player.location.cost:
+                curr_player.buy(curr_player.location) # check for monopoly
         else:
-            rent = curr_player.location.rent
-        if not curr_player.pay_to(curr_player.location.owner, rent):
-            # debts
-            pass
-    
+            if curr_player.location.set == 'Utilites':
+                if curr_player.location.whole_set:
+                    rent = roll * 10
+                else:
+                    rent = roll * 4
+            elif curr_player.location.set == 'RR':
+                rent = curr_player.rr * curr_player.location.rent
+            elif curr_player.location.whole_set:
+                if curr_player.location.num_houses == 0:
+                    rent = curr_player.location.rent * 2
+                elif curr_player.location.num_houses == 1:
+                    rent = curr_player.location.one_house
+                elif curr_player.location.num_houses == 2:
+                    rent = curr_player.location.two_houses
+                elif curr_player.location.num_houses == 3:
+                    rent = curr_player.location.three_houses
+                elif curr_player.location.num_houses == 4:
+                    rent = curr_player.location.four_houses
+                else:
+                    rent = curr_player.location.hotel
+            else:
+                rent = curr_player.location.rent
+            if not curr_player.pay_to(curr_player.location.owner, rent):
+                if not curr_player.debt(rent): 
+                    game.dead_players.add(curr_player)
+                    double = False
+                    curr_player.bankrupt(curr_player.location.owner)
+                curr_player.pay_to(curr_player.location.owner, rent)
+        
+        # build properties
+
+        if not double:
+            turn += 1
+        turn = turn % game.player_count
+        game.total_turns += 1
 
 
 
 
-
-
-    
-    # build properties
-
-    if not double:
-        turn += 1
-    turn = turn % game.player_count
-
-
-
-
-    
+        
 
 

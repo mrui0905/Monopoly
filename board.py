@@ -1,149 +1,152 @@
-import player as pl
-
-# need to include total number of houses and hotels 
 class Board:
+    # Initializes each location on the monopoly board
     def __init__(self, next, set, cost, rent, cost_of_house, one_house, two_houses, three_houses, four_houses, hotel):
-        self.cost = cost
-        self.next = next
-        self.set = set
-        self.owner = None
-        self.unowned = True
-        self.mortaged = False
-        self.rent = rent
-        self.cost_of_house = cost_of_house
-        self.whole_set = False
-        self.one_house = one_house
-        self.two_houses = two_houses
-        self.three_houses = three_houses
-        self.four_houses = four_houses
-        self.hotel = hotel
-        self.num_houses = 0
+        self.cost = cost # cost to buy location
+        self.next = next # following location
+        self.set = set # set each location belongs too: 'Special', 'Utility', 'Brown', 'Light Blue', 'Purple', 'Orange', 'Red', 'Yellow', 'Green', 'Dark Blue', 'RR'
+        self.owner = None # player that owns location. None if self.unowned is True
+        self.unowned = True # True if location is owned by a player
+        self.mortaged = False # True if location is mortaged
+        self.rent = rent # cost of rent
+        self.cost_of_house = cost_of_house # cost to build one house/hotel
+        self.whole_set = False # True if player owns a monopoly of a set. Does not apply to 'Special' and 'RR'
+        self.one_house = one_house # cost of rent with one house
+        self.two_houses = two_houses # cost of rent with two houses
+        self.three_houses = three_houses # cost of rent with three houses
+        self.four_houses = four_houses # cost of rent with four houses
+        self.hotel = hotel # cost of rent with a hotel
+        self.num_houses = 0 # number of houses/hotels. 5 if hotel
 
+        # Initalizes all 38 locations
+        self.create_board()
+
+    # Transfer ownership of a property to player
     def change_ownership(self, player):
         self.owner = player
         if not self.unowned:
             self.unowned = False
 
 
-def create_board():
-    Go = Board(None, 'Special')
+    # Contains data to initalize all 38 locations
+    def create_board():
+        Go = Board(None, 'Special')
 
-    Mediterranean = Board(None, 'Brown', 60, 2, 50, 10, 30, 90, 160, 250)
-    Go.next = Mediterranean
+        Mediterranean = Board(None, 'Brown', 60, 2, 50, 10, 30, 90, 160, 250)
+        Go.next = Mediterranean
 
-    Community_Chest_One = Board(None, 'Special')
-    Mediterranean.next = Community_Chest_One
+        Community_Chest_One = Board(None, 'Special')
+        Mediterranean.next = Community_Chest_One
 
-    Baltic = Board(None, 'Brown', 60, 4, 50, 8, 20, 60, 60, 180, 320, 450)
-    Community_Chest_One.next = Baltic
+        Baltic = Board(None, 'Brown', 60, 4, 50, 8, 20, 60, 60, 180, 320, 450)
+        Community_Chest_One.next = Baltic
 
-    Income_Tax = Board(None, 'Special')
-    Baltic.next = Income_Tax
+        Income_Tax = Board(None, 'Special')
+        Baltic.next = Income_Tax
 
-    Reading = Board(None, 'RR', 200, 50)
-    Income_Tax.next = Reading
+        Reading = Board(None, 'RR', 200, 50)
+        Income_Tax.next = Reading
 
-    Oriental = Board(None, 'Light Blue', 100, 6, 50, 30, 90, 270, 400, 550)
-    Reading.next = Oriental
+        Oriental = Board(None, 'Light Blue', 100, 6, 50, 30, 90, 270, 400, 550)
+        Reading.next = Oriental
 
-    Chance_One = Board(None, 'Special')
-    Oriental.next = Chance_One
+        Chance_One = Board(None, 'Special')
+        Oriental.next = Chance_One
 
-    Vermont = Board(None, 'Light Blue', 100, 6, 50, 30, 90, 270, 400, 550)
-    Chance_One.next = Vermont
+        Vermont = Board(None, 'Light Blue', 100, 6, 50, 30, 90, 270, 400, 550)
+        Chance_One.next = Vermont
 
-    Connecticut = Board(None, 'Light Blue', 120, 8, 50, 40, 100, 300, 450, 600)
-    Vermont.next = Connecticut
+        Connecticut = Board(None, 'Light Blue', 120, 8, 50, 40, 100, 300, 450, 600)
+        Vermont.next = Connecticut
 
-    Jail = Board(None, 'Special')
-    Connecticut.next = Jail
+        Jail = Board(None, 'Special')
+        Connecticut.next = Jail
 
-    St_Charles = Board(None, 'Purple', 140, 10, 100, 50, 150, 450, 625, 750)
-    Jail.next = St_Charles
+        St_Charles = Board(None, 'Purple', 140, 10, 100, 50, 150, 450, 625, 750)
+        Jail.next = St_Charles
 
-    Electric_Company = Board(None, 'Utility', 150)
-    St_Charles.next = Electric_Company
+        Electric_Company = Board(None, 'Utility', 150)
+        St_Charles.next = Electric_Company
 
-    States = Board(None, 'Purple', 140, 10, 100, 50, 150, 450, 625, 750)
-    Electric_Company.next = States
+        States = Board(None, 'Purple', 140, 10, 100, 50, 150, 450, 625, 750)
+        Electric_Company.next = States
 
-    Virginia = Board(None, 'Purple', 160, 12, 100, 60, 180, 500, 700, 900)
-    States.next = Virginia
+        Virginia = Board(None, 'Purple', 160, 12, 100, 60, 180, 500, 700, 900)
+        States.next = Virginia
 
-    Pennsylvania_RR = Board(None, 'RR', 200, 50)
-    Virginia.next = Pennsylvania_RR
+        Pennsylvania_RR = Board(None, 'RR', 200, 50)
+        Virginia.next = Pennsylvania_RR
 
-    St_James = Board(None, 'Orange', 180, 14, 100, 70, 200, 550, 750, 950)
-    Pennsylvania_RR.next = St_James
+        St_James = Board(None, 'Orange', 180, 14, 100, 70, 200, 550, 750, 950)
+        Pennsylvania_RR.next = St_James
 
-    Community_Chest_Two = Board(None, "Special")
-    St_James.next = Community_Chest_Two
+        Community_Chest_Two = Board(None, "Special")
+        St_James.next = Community_Chest_Two
 
-    Tennessee = Board(None, 'Orange', 180, 14, 100, 70, 200, 550, 750, 950)
-    Community_Chest_Two.next = Tennessee
+        Tennessee = Board(None, 'Orange', 180, 14, 100, 70, 200, 550, 750, 950)
+        Community_Chest_Two.next = Tennessee
 
-    New_York = Board(None, 'Orange', 200, 16, 100, 80, 220, 600, 800, 1000)
-    Tennessee.next = New_York
+        New_York = Board(None, 'Orange', 200, 16, 100, 80, 220, 600, 800, 1000)
+        Tennessee.next = New_York
 
-    Free_Parking = Board(None, 'Special')
-    New_York.next = Free_Parking
+        Free_Parking = Board(None, 'Special')
+        New_York.next = Free_Parking
 
-    Kentucky = Board(None, 'Red', 220, 18, 150, 90, 250, 700, 875, 1050)
-    Free_Parking.next = Kentucky
+        Kentucky = Board(None, 'Red', 220, 18, 150, 90, 250, 700, 875, 1050)
+        Free_Parking.next = Kentucky
 
-    Chance_Two = Board(None, 'Special')
-    Kentucky.next = Chance_Two
+        Chance_Two = Board(None, 'Special')
+        Kentucky.next = Chance_Two
 
-    Indiana = Board(None, 'Red', 220, 18, 150, 90, 250, 700, 875, 1050)
-    Chance_Two.next = Indiana
+        Indiana = Board(None, 'Red', 220, 18, 150, 90, 250, 700, 875, 1050)
+        Chance_Two.next = Indiana
 
-    Illinois = Board(None, 'Red', 240, 20, 150, 100, 300, 750, 925, 1100)
-    Indiana.next = Illinois
+        Illinois = Board(None, 'Red', 240, 20, 150, 100, 300, 750, 925, 1100)
+        Indiana.next = Illinois
 
-    B_and_O = Board(None, 'RR", 200, 50')
-    Illinois.next = B_and_O
+        B_and_O = Board(None, 'RR", 200, 50')
+        Illinois.next = B_and_O
 
-    Atlantic = Board(None, 'Yellow', 260, 22, 150, 110, 330, 800, 975, 1150)
-    B_and_O.next = Atlantic
+        Atlantic = Board(None, 'Yellow', 260, 22, 150, 110, 330, 800, 975, 1150)
+        B_and_O.next = Atlantic
 
-    Ventnor = Board(None, 'Yellow', 260, 22, 150, 110, 330, 800, 975, 1150)
-    Atlantic.next = Ventnor
+        Ventnor = Board(None, 'Yellow', 260, 22, 150, 110, 330, 800, 975, 1150)
+        Atlantic.next = Ventnor
 
-    Water_Works = Board(None, "Utilites", 150)
-    Ventnor.next = Water_Works
+        Water_Works = Board(None, "Utilites", 150)
+        Ventnor.next = Water_Works
 
-    Marvin_Gardens = Board(None, 'Yellow', 280, 24, 150, 120, 360, 850, 1025, 1200)
-    Water_Works.next = Marvin_Gardens
+        Marvin_Gardens = Board(None, 'Yellow', 280, 24, 150, 120, 360, 850, 1025, 1200)
+        Water_Works.next = Marvin_Gardens
 
-    Go_To_Jail = Board(None, 'Special')
-    Marvin_Gardens.next = Go_To_Jail
+        Go_To_Jail = Board(None, 'Special')
+        Marvin_Gardens.next = Go_To_Jail
 
-    Pacific = Board(None, 'Green', 300, 26, 200, 52, 130, 390, 900, 1100, 1275)
-    Go_To_Jail.next = Pacific
+        Pacific = Board(None, 'Green', 300, 26, 200, 52, 130, 390, 900, 1100, 1275)
+        Go_To_Jail.next = Pacific
 
-    North_Carolina = Board(None, 'Green', 300, 26, 200, 52, 130, 390, 900, 1100, 1275)
-    Pacific.next = North_Carolina
+        North_Carolina = Board(None, 'Green', 300, 26, 200, 52, 130, 390, 900, 1100, 1275)
+        Pacific.next = North_Carolina
 
-    Community_Chest_Three = Board(None, 'Special')
-    North_Carolina.next = Community_Chest_Three
+        Community_Chest_Three = Board(None, 'Special')
+        North_Carolina.next = Community_Chest_Three
 
-    Pennsylvania = Board(None, 'Green', 320, 28, 200, 150, 450, 1000, 1200, 1400)
-    Community_Chest_Two.next = Pennsylvania
+        Pennsylvania = Board(None, 'Green', 320, 28, 200, 150, 450, 1000, 1200, 1400)
+        Community_Chest_Two.next = Pennsylvania
 
-    Short_Line = Board(None, 'RR', 200, 50)
-    Pennsylvania.next = Short_Line
+        Short_Line = Board(None, 'RR', 200, 50)
+        Pennsylvania.next = Short_Line
 
-    Chance_Three = Board(None, 'Special')
-    Short_Line.next = Chance_Three
+        Chance_Three = Board(None, 'Special')
+        Short_Line.next = Chance_Three
 
-    Park_Place = Board(None, "Dark Blue", 350, 35, 200, 175, 500, 1100, 1300, 1500)
-    Chance_Three.next = Park_Place
+        Park_Place = Board(None, "Dark Blue", 350, 35, 200, 175, 500, 1100, 1300, 1500)
+        Chance_Three.next = Park_Place
 
-    Luxury_Tax = Board(None, 'Special')
-    Park_Place.next = Luxury_Tax
+        Luxury_Tax = Board(None, 'Special')
+        Park_Place.next = Luxury_Tax
 
-    Boardwalk = Board(Go, 'Dark Blue', 400, 50, 200, 200, 600, 1400, 1700, 2000)
-    Luxury_Tax.next = Boardwalk
+        Boardwalk = Board(Go, 'Dark Blue', 400, 50, 200, 200, 600, 1400, 1700, 2000)
+        Luxury_Tax.next = Boardwalk
 
 
 
