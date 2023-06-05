@@ -2,8 +2,8 @@ import board as bd
 
 class Player:
     # Initializes every player
-    def __init__(self):
-        self.location = bd.go
+    def __init__(self, location):
+        self.location = location
         self.money = 1500
         self.properties = set()
         self.jail_card = 0
@@ -94,7 +94,7 @@ class Player:
         return
 
 
-    # 'self' liqudates assets until 'self' has enough money to pay 'amount'
+    # 'self' liqudates assets until 'self' has enough money to pay 'amount'. Return True if sufficent funds are produced, False otherwise
     def debt(self, amount):
         not_monopoly = set() # creates set of properities not in a monopoly (will include railroads)
         is_monopoly = set() # creates set of properties in a monopoly

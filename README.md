@@ -3,6 +3,8 @@
 
 Key Assumptions:
 
+Purchasing Logic:
+- PLayers will purchase any unowned property they land on, assuming they have sufficient funds.
 Jail Logic:
 - Players will attempt to leave jail as quickly as possible, whether through using a Get out of Jail Free Card or paying $50
 
