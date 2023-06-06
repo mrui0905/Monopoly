@@ -12,25 +12,149 @@ class Game:
         self.dead_players = set() # set of dead players
         self.turn_order = [] # order of play
 
+        self.mode = self.input_player_logic()
+
         self.hotels = 0 # total number of built hotels, max is 12
         self.houses = 0 # total number of built houses, max is 32
         self.total_turns = 0 # total number of played turns, used to terminate perpetutual games
 
-        player_one = pl.Player() # initializes first player
-        player_two = pl.Player() # initializes second player
+        # Initalizes all 40 properties
+        self.Go = bd.Board(None, 'Special')
+
+        self.Mediterranean = bd.Board(None, 'Brown', 60, 2, 50, 10, 30, 90, 160, 250)
+        self.Go.next = self.Mediterranean
+
+        self.Community_Chest_One = bd.Board(None, 'Special')
+        self.Mediterranean.next = self.Community_Chest_One
+
+        self.Baltic = bd.Board(None, 'Brown', 60, 4, 50, 8, 20, 60, 60, 180, 320, 450)
+        self.Community_Chest_One.next = self.Baltic
+
+        self.Income_Tax = bd.Board(None, 'Special')
+        self.Baltic.next = self.Income_Tax
+
+        self.Reading = bd.Board(None, 'RR', 200, 50)
+        self.Income_Tax.next = self.Reading
+
+        self.Oriental = bd.Board(None, 'Light Blue', 100, 6, 50, 30, 90, 270, 400, 550)
+        self.Reading.next = self.Oriental
+
+        self.Chance_One = bd.Board(None, 'Special')
+        self.Oriental.next = self.Chance_One
+
+        self.Vermont = bd.Board(None, 'Light Blue', 100, 6, 50, 30, 90, 270, 400, 550)
+        self.Chance_One.next = self.Vermont
+
+        self.Connecticut = bd.Board(None, 'Light Blue', 120, 8, 50, 40, 100, 300, 450, 600)
+        self.Vermont.next = self.Connecticut
+
+        self.Jail = bd.Board(None, 'Special')
+        self.Connecticut.next = self.Jail
+
+        self.St_Charles = bd.Board(None, 'Purple', 140, 10, 100, 50, 150, 450, 625, 750)
+        self.Jail.next = self.St_Charles
+
+        self.Electric_Company = bd.Board(None, 'Utility', 150)
+        self.St_Charles.next = self.Electric_Company
+
+        self.States = bd.Board(None, 'Purple', 140, 10, 100, 50, 150, 450, 625, 750)
+        self.Electric_Company.next = self.States
+
+        self.Virginia = bd.Board(None, 'Purple', 160, 12, 100, 60, 180, 500, 700, 900)
+        self.States.next = self.Virginia
+
+        self.Pennsylvania_RR = bd.Board(None, 'RR', 200, 50)
+        self.Virginia.next = self.Pennsylvania_RR
+
+        self.St_James = bd.Board(None, 'Orange', 180, 14, 100, 70, 200, 550, 750, 950)
+        self.Pennsylvania_RR.next = self.St_James
+
+        self.Community_Chest_Two = bd.Board(None, "Special")
+        self.St_James.next = self.Community_Chest_Two
+
+        self.Tennessee = bd.Board(None, 'Orange', 180, 14, 100, 70, 200, 550, 750, 950)
+        self.Community_Chest_Two.next = self.Tennessee
+
+        self.New_York = bd.Board(None, 'Orange', 200, 16, 100, 80, 220, 600, 800, 1000)
+        self.Tennessee.next = self.New_York
+
+        self.Free_Parking = bd.Board(None, 'Special')
+        self.New_York.next = self.Free_Parking
+
+        self.Kentucky = bd.Board(None, 'Red', 220, 18, 150, 90, 250, 700, 875, 1050)
+        self.Free_Parking.next = self.Kentucky
+
+        self.Chance_Two = bd.Board(None, 'Special')
+        self.Kentucky.next = self.Chance_Two
+
+        self.Indiana = bd.Board(None, 'Red', 220, 18, 150, 90, 250, 700, 875, 1050)
+        self.Chance_Two.next = self.Indiana
+
+        self.Illinois = bd.Board(None, 'Red', 240, 20, 150, 100, 300, 750, 925, 1100)
+        self.Indiana.next = self.Illinois
+
+        self.B_and_O = bd.Board(None, 'RR", 200, 50')
+        self.Illinois.next = self.B_and_O
+
+        self.Atlantic = bd.Board(None, 'Yellow', 260, 22, 150, 110, 330, 800, 975, 1150)
+        self.B_and_O.next = self.Atlantic
+
+        self.Ventnor = bd.Board(None, 'Yellow', 260, 22, 150, 110, 330, 800, 975, 1150)
+        self.Atlantic.next = self.Ventnor
+
+        self.Water_Works = bd.Board(None, "Utilites", 150)
+        self.Ventnor.next = self.Water_Works
+
+        self.Marvin_Gardens = bd.Board(None, 'Yellow', 280, 24, 150, 120, 360, 850, 1025, 1200)
+        self.Water_Works.next = self.Marvin_Gardens
+
+        self.Go_To_Jail = bd.Board(None, 'Special')
+        self.Marvin_Gardens.next = self.Go_To_Jail
+
+        self.Pacific = bd.Board(None, 'Green', 300, 26, 200, 52, 130, 390, 900, 1100, 1275)
+        self.Go_To_Jail.next = self.Pacific
+
+        self.North_Carolina = bd.Board(None, 'Green', 300, 26, 200, 52, 130, 390, 900, 1100, 1275)
+        self.Pacific.next = self.North_Carolina
+
+        self.Community_Chest_Three = bd.Board(None, 'Special')
+        self.North_Carolina.next = self.Community_Chest_Three
+
+        self.Pennsylvania = bd.Board(None, 'Green', 320, 28, 200, 150, 450, 1000, 1200, 1400)
+        self.Community_Chest_Two.next = self.Pennsylvania
+
+        self.Short_Line = bd.Board(None, 'RR', 200, 50)
+        self.Pennsylvania.next = self.Short_Line
+
+        self.Chance_Three = bd.Board(None, 'Special')
+        self.Short_Line.next = self.Chance_Three
+
+        self.Park_Place = bd.Board(None, "Dark Blue", 350, 35, 200, 175, 500, 1100, 1300, 1500)
+        self.Chance_Three.next = self.Park_Place
+
+        self.Luxury_Tax = bd.Board(None, 'Special')
+        self.Park_Place.next = self.Luxury_Tax
+
+        self.Boardwalk = bd.Board(self.Go, 'Dark Blue', 400, 50, 200, 200, 600, 1400, 1700, 2000)
+        self.Luxury_Tax.next = self.Boardwalk
+
+        # Initalizes players
+        player_one = pl.Player(self.Go, 1) # initializes first player
+        player_two = pl.Player(self.Go, 2) # initializes second player
         self.players.add(player_one)
         self.players.add(player_two)
         self.turn_order.append(player_one)
         self.turn_order.append(player_two)
 
         if self.player_count > 2:
-            player_three = pl.Player() # initializes third player
+            player_three = pl.Player(self.Go, 3) # initializes third player
             self.players.add(player_three)
             self.turn_order.append(player_three)
         if self.player_count > 3:
-            player_four = pl.Player() # initializes fourth player
+            player_four = pl.Player(self.Go, 4) # initializes fourth player
             self.players.add(player_four)
             self.turn_order.append(player_four)
+
 
     # Prompts for number of players
     def input_num_players(self):
@@ -39,6 +163,20 @@ class Game:
         while type(num) != int or num < 2 or num > 4:
             num = input('Invalid Input! Please re-enter the number of players (2-4)')
         return num
+    
+    # Prompts for player logic
+    def input_player_logic(self):
+        possible = {0:'CPU Simulation'}
+        print('Possible Modes are:')
+        for k,v in possible:
+            print('Select', k, 'for', v, 'mode')
+        mode = input('Select a player mode: ')
+        # Retries until user inputs valid mode
+        while mode not in possible:
+            mode = input('Invalid Input! Please re-enter the player mode')
+
+        return mode
+
 
     # Produces sum of two random integers from 1-6. Also returns boolean value 'double' which is True if the two dice values are equal.
     # Returns -1 if third consecutive double, 'self' is then sent to jail
@@ -79,7 +217,7 @@ class Game:
         pass
     
 
-if __name__ == '__main__':
+def main():
     print('Welcome to Monopoly!')
 
     game = Game() # creates game
@@ -105,7 +243,7 @@ if __name__ == '__main__':
         for roll in rolls:
             # checks if 'curr_player' received 3 consecutive doubles. If so, 'curr_player' is sent to jail
             if roll == -1:
-                curr_player.go_to_jail()
+                curr_player.go_to_jail(game.jail)
                 break
             
             # checks if 'curr_player' begins their turn imprisoned.
@@ -133,32 +271,32 @@ if __name__ == '__main__':
             # moves 'curr_player" forward 'roll' locations
             for _ in range(roll):
                 curr_player.location = curr_player.location.next
-                if curr_player.location == bd.Go: # 'curr_player' receives $200 for passing go
+                if curr_player.location == game.Go: # 'curr_player' receives $200 for passing go
                     curr_player += 200
 
             # ADD:check for mortage
             # 'curr_player' lands on a location that is not ownable
             if curr_player.location.set == 'Special':
                 # curr_player lands on Go, Free Parking, or Jail
-                if curr_player.location == bd.Go or curr_player.location == bd.Free_Parking or curr_player.location == bd.Jail:
+                if curr_player.location == game.Go or curr_player.location == game.Free_Parking or curr_player.location == game.Jail:
                     continue
                 # curr_player lands on a Community Chest
-                elif curr_player.location == bd.Community_Chest_One or curr_player.location == bd.Community_Chest_Two or curr_player.location == bd.Community_Chest_Three:
+                elif curr_player.location == game.Community_Chest_One or curr_player.location == game.Community_Chest_Two or curr_player.location == game.Community_Chest_Three:
                     game.community_chest(curr_player)
                     pass
                 # curr_player lands on a Chance
-                elif curr_player.location == bd.Chance_One or curr_player.location == bd.Chance_Two or curr_player.location == bd.Chance_Three:
+                elif curr_player.location == game.Chance_One or curr_player.location == game.Chance_Two or curr_player.location == game.Chance_Three:
                     game.chance(curr_player)
                     pass
                 # curr_player lands on Income Tax
-                elif curr_player.location == bd.Income_Tax:
+                elif curr_player.location == game.Income_Tax:
                     if curr_player.money < 200:
                         if not curr_player.debt(200): 
                             game.dies(curr_player)
                             break
                     curr_player.money -= 200
                 # curr_player lands on Luxury Tax
-                elif curr_player.location == bd.Luxury_Tax:
+                elif curr_player.location == game.Luxury_Tax:
                     if curr_player.money < 100:
                         if not curr_player.debt(100): 
                             game.dies(curr_player)
@@ -218,8 +356,9 @@ if __name__ == '__main__':
         game.total_turns += 1
 
     winner = list(game.players)[0]
-    print('Winner is: ', winner)
+    print('Winner is Player', winner.number)
     print('Total number of turns: ', game.total_turns)
+    return winner.number
     
 
 

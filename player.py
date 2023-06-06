@@ -2,7 +2,8 @@ import board as bd
 
 class Player:
     # Initializes every player
-    def __init__(self, location):
+    def __init__(self, location, number):
+        self.number = number
         self.location = location
         self.money = 1500
         self.properties = set()
@@ -21,8 +22,8 @@ class Player:
         return True
     
     # Sends 'self' to jail
-    def go_to_jail(self):
-        self.location = bd.Jail
+    def go_to_jail(self, jail):
+        self.location = jail
         self.imprisoned = True
         return
 

@@ -1,5 +1,14 @@
 # Monopoly'
 
+To Dos:
+- Implement options for chance and community chests (https://monopoly.fandom.com/wiki/Community_Chest)
+    - Implement logic to return GOFJ cards
+- Implement CPU logic
+- Test simulation mode
+- Implement single-player mode
+- test player mode
+- Cerate simulations
+
 
 Key Assumptions:
 
