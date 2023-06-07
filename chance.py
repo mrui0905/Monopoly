@@ -1,8 +1,8 @@
 import random
 
 class Chance:
-    def __init__(self, game):
-        self.order = random.shuffle([i for i in range(15)]) # shuffled order of cards
+    def __init__(self):
+        self.order = random.shuffle([i for i in range(14)]) # shuffled order of cards
         self.idx = 0 # next card index
         self.jail = False # True if Get out of Jail Free Card is in possession
 
@@ -11,14 +11,14 @@ def draw(self):
     num = self.order[self.idx]
 
     self.idx != 1
-    self.idx = self.idx % 16
+    self.idx = self.idx % 14
     
     # Draws next card if Get out of Jail card is impossibly drawn
     if num == 0 and self.jail:
         num = self.order[self.idx]
 
         self.idx != 1
-        self.idx = self.idx % 16
+        self.idx = self.idx % 14
 
     return num
 

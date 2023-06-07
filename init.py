@@ -1,5 +1,7 @@
 import player as pl
 import board as bd
+import chance
+import community_chest
 import random
 
 class Game:
@@ -17,6 +19,10 @@ class Game:
         self.hotels = 0 # total number of built hotels, max is 12
         self.houses = 0 # total number of built houses, max is 32
         self.total_turns = 0 # total number of played turns, used to terminate perpetutual games
+
+        #Itialilize Chance and Community Chest
+        self.ch = chance.Chance()
+        self.cc = community_chest.Community_Chest()
 
         # Initalizes all 40 properties
         self.Go = bd.Board(None, 'Special')
@@ -207,14 +213,259 @@ class Game:
         player.bankrupt(player, debtor)
         return
     
+    def collect_from_all(self, player, amount):
+        for p in self.players:
+            if player is p:
+                continue
+            if not p.pay_to(player, amount):
+                if not p.debt(50): 
+                    self.dies(p, player)
+                    continue
+                p.pay_to(player, amount)
+
+    def pay_to_bank(self, player, amount):
+        if player.money < amount:
+            if not player.debt(amount): 
+                self.dies(player)
+        if player not in self.dead_players:
+            player.money -= amount
+            return True
+        return False 
+    
     def community_chest(self, player):
-        pass
+        card = self.cc.draw()
+
+        if card == 0:
+            player.jail.card += 1
+        if card == 1:
+            player.location = self.Go
+            player.money += 200
+        if card == 2:
+            player.money += 200
+        if card == 3:
+            self.pay_to_bank(player, 50)
+        if card == 4:
+            self.money += 50
+        if card == 5:
+            player.go_to_jail(self.jail)
+        if card == 6:
+            self.collect_from_all(player, 50)
+        if card == 7:
+            player.money += 100
+        if card == 8:
+            player.money += 20
+        if card == 9:
+            self.collect_from_all(player, 10)
+        if card == 10:
+            self.money += 100
+        if card == 11:
+            self.pay_to_bank(player, 50)
+        if card == 12:
+            self.pay_to_bank(player, 50)
+        if card == 13:
+            self.money += 25
+        if card == 14:
+            houses, hotels = 0, 0
+            for property in player.properties:
+                houses += property.num_houses
+                if property.num_houses == 5:
+                    houses -= 1
+                    hotels += 1
+            self.pay_to_bank(player, 40*houses + 115 * hotels)
+        if card == 15:
+            self.money += 10
+        if card == 16:
+            self.money += 100
+
+        if player in self.dead_players or player.imprisoned:
+            return False
+        return True
 
     def chance(self, player):
-        pass
+        card = self.ch.draw()
+
+        if card == 0:
+            player.jail.card += 1
+        if card == 1:
+            player.location = self.Go
+            player.money += 200
+        if card == 2:
+            while player.location != self.Illinois:
+                player.location = player.location.next
+
+                if player.location is self.Go:
+                    player.money += 200
+
+            if not self.land_on_location(player, self):
+                return False
+        if card == 3:
+            while player.location != self.St_Charles:
+                player.location = player.location.next
+
+                if player.location is self.Go:
+                    player.money += 200
+
+            if not self.land_on_location(player, self):
+                return False
+        if card == 4:
+            while player.location.set != 'Utility':
+                player.location = player.location.next
+
+                if player.location is self.Go:
+                    player.money += 200
+
+            if player.location.unowned:
+                if player.money >= player.location.cost:
+                    player.buy(player.location)
+                    player.update_whole_set()
+
+            else:
+                rent = 10 * (random.randint(1,6) + random.randint(1,6))
+                if not player.pay_to(player.location.owner, rent):
+                    if not player.debt(rent): 
+                        self.dies(player, player.location.owner)
+                        return False
+                    player.pay_to(player.location.owner, rent)
+        if card == 5:
+            while player.location.set != 'RR':
+                player.location = player.location.next
+
+                if player.location is self.Go:
+                    player.money += 200
+
+            if player.location.unowned:
+                if player.money >= player.location.cost:
+                    player.buy(player.location)
+                    player.update_whole_set()
+
+            else:
+                rent = player.location.owner.rr * player.location.rent * 2
+                if not player.pay_to(player.location.owner, rent):
+                    if not player.debt(rent): 
+                        self.dies(player, player.location.owner)
+                        return False
+                    player.pay_to(player.location.owner, rent)
+        if card == 6:
+            player.money += 50
+        if card == 7:
+            for _ in range(37):
+                player.location = player.location.next
+
+            if not self.land_on_location(player, self):
+                return False
+        if card == 8:
+            player.go_to_jail(self.jail)
+        if card == 9:
+            houses, hotels = 0, 0
+            for property in player.properties:
+                houses += property.num_houses
+                if property.num_houses == 5:
+                    houses -= 1
+                    hotels += 1
+            self.pay_to_bank(player, 25*houses + 100 * hotels)
+        if card == 10:
+            while player.location != self.Reading:
+                player.location = player.location.next
+
+                if player.location is self.Go:
+                    player.money += 200
+
+            if not self.land_on_location(player, self):
+                return False
+        if card == 11:
+            while player.location != self.Boardwalk:
+                player.location = player.location.next
+
+                if player.location is self.Go:
+                    player.money += 200
+
+            if not self.land_on_location(player, self):
+                return False
+        if card == 12:
+            self.pay_to_bank(player, 50*(self.players_alive -1))
+            for p in self.players:
+                if player is p:
+                    continue
+                player.money += 50
+        if card == 13:
+            self.money += 150
+        
+        if player in self.dead_players or player.imprisoned:
+            return False
+        return True
     
     def end_turn(self):
         pass
+
+    def land_on_location(self, player, game, roll=0):
+    # 'player' lands on a location that is not ownable
+        if player.location.set == 'Special':
+            # player lands on Go, Free Parking, or Jail
+            if player.location is game.Go or player.location is game.Free_Parking or player.location is game.Jail:
+                pass
+            # player lands on a Community Chest
+            elif player.location is game.Community_Chest_One or player.location is game.Community_Chest_Two or player.location is game.Community_Chest_Three:
+                if not game.community_chest(player):
+                    return False
+            # player lands on a Chance
+            elif player.location is game.Chance_One or player.location is game.Chance_Two or player.location is game.Chance_Three:
+                if not game.chance(player):
+                    return False
+            # player lands on Income Tax
+            elif player.location is game.Income_Tax:
+                if not game.pay_to_bank(player, 200):
+                    return False
+            # player lands on Luxury Tax
+            elif player.location is game.Luxury_Tax:
+                if not game.pay_to_bank(player, 100):
+                    return False
+            # player lands on Go To Jail
+            else:
+                player.go_to_jail()
+                return False
+        # 'player' lands on unowned property
+        elif not player.location.owner:
+            if player.money >= player.location.cost:
+                player.buy(player.location)
+                player.update_whole_set()
+        # 'player' lands on an owned proprety
+        else:
+            # 'player' pays no rent if the property is mortaged
+            if player.location.mortaged:
+                pass
+            # 'player' lands on a Utiliy
+            elif player.location.set == 'Utilites':
+                if player.location.whole_set:
+                    rent = roll * 10
+                else:
+                    rent = roll * 4
+            # 'player' lands on a Railroad
+            elif player.location.set == 'RR':
+                rent = player.location.owner.rr * player.location.rent
+            # 'player' lands on a monopoly
+            elif player.location.whole_set:
+                if player.location.num_houses == 0:
+                    rent = player.location.rent * 2
+                elif player.location.num_houses == 1:
+                    rent = player.location.one_house
+                elif player.location.num_houses == 2:
+                    rent = player.location.two_houses
+                elif player.location.num_houses == 3:
+                    rent = player.location.three_houses
+                elif player.location.num_houses == 4:
+                    rent = player.location.four_houses
+                else:
+                    rent = player.location.hotel
+            # 'player' lands on an owned property that is not a monopoly
+            else:
+                rent = player.location.rent
+            if not player.pay_to(player.location.owner, rent):
+                if not player.debt(rent): 
+                    game.dies(player, player.location.owner)
+                    return False
+                player.pay_to(player.location.owner, rent)
+
+        return True
     
 
 def main():
@@ -274,81 +525,12 @@ def main():
                 if curr_player.location == game.Go: # 'curr_player' receives $200 for passing go
                     curr_player += 200
 
-            # ADD:check for mortage
-            # 'curr_player' lands on a location that is not ownable
-            if curr_player.location.set == 'Special':
-                # curr_player lands on Go, Free Parking, or Jail
-                if curr_player.location == game.Go or curr_player.location == game.Free_Parking or curr_player.location == game.Jail:
-                    continue
-                # curr_player lands on a Community Chest
-                elif curr_player.location == game.Community_Chest_One or curr_player.location == game.Community_Chest_Two or curr_player.location == game.Community_Chest_Three:
-                    game.community_chest(curr_player)
-                    pass
-                # curr_player lands on a Chance
-                elif curr_player.location == game.Chance_One or curr_player.location == game.Chance_Two or curr_player.location == game.Chance_Three:
-                    game.chance(curr_player)
-                    pass
-                # curr_player lands on Income Tax
-                elif curr_player.location == game.Income_Tax:
-                    if curr_player.money < 200:
-                        if not curr_player.debt(200): 
-                            game.dies(curr_player)
-                            break
-                    curr_player.money -= 200
-                # curr_player lands on Luxury Tax
-                elif curr_player.location == game.Luxury_Tax:
-                    if curr_player.money < 100:
-                        if not curr_player.debt(100): 
-                            game.dies(curr_player)
-                            break
-                    curr_player.money -= 100
-                # curr_player lands on Go To Jail
-                else:
-                    curr_player.go_to_jail()
-                    break
-            # 'curr_player' lands on unowned property
-            elif not curr_player.location.owner:
-                if curr_player.money >= curr_player.location.cost:
-                    curr_player.buy(curr_player.location)
-                    curr_player.update_whole_set()
-            # 'curr_player' lands on an owned proprety
-            else:
-                # 'curr_player' pays no rent if the property is mortaged
-                if curr_player.location.mortaged:
-                    continue
-                # 'curr_player' lands on a Utiliy
-                if curr_player.location.set == 'Utilites':
-                    if curr_player.location.whole_set:
-                        rent = roll * 10
-                    else:
-                        rent = roll * 4
-                # 'curr_player' lands on a Railroad
-                elif curr_player.location.set == 'RR':
-                    rent = curr_player.location.owner.rr * curr_player.location.rent
-                # 'curr_player' lands on a monopoly
-                elif curr_player.location.whole_set:
-                    if curr_player.location.num_houses == 0:
-                        rent = curr_player.location.rent * 2
-                    elif curr_player.location.num_houses == 1:
-                        rent = curr_player.location.one_house
-                    elif curr_player.location.num_houses == 2:
-                        rent = curr_player.location.two_houses
-                    elif curr_player.location.num_houses == 3:
-                        rent = curr_player.location.three_houses
-                    elif curr_player.location.num_houses == 4:
-                        rent = curr_player.location.four_houses
-                    else:
-                        rent = curr_player.location.hotel
-                # 'curr_player' lands on an owned property that is not a monopoly
-                else:
-                    rent = curr_player.location.rent
-                if not curr_player.pay_to(curr_player.location.owner, rent):
-                    if not curr_player.debt(rent): 
-                        game.dies(curr_player, curr_player.location.owner)
-                    curr_player.pay_to(curr_player.location.owner, rent)
+            if not game.land_on_location(curr_player, game, roll):
+                break
         
         # 'curr_player'' now has opporuinity to build unmortage properties and build houses/hotels
-        game.end_turn(curr_player)
+        if curr_player in game.players:
+            game.end_turn(curr_player)
 
         # turn count is not updated for next player
         turn += 1
