@@ -7,7 +7,7 @@ class Player:
         self.location = location
         self.money = 1500
         self.properties = set()
-        self.jail_card = 0
+        self.jail_card = set()
         self.imprisoned = False
         self.imprisoned_count = 0
         self.rr = 0

@@ -1,13 +1,13 @@
 # Monopoly'
 
 To Dos:
-- Implement options for chance and community chests (https://monopoly.fandom.com/wiki/Community_Chest)
-    - Implement logic to return GOFJ cards
 - Implement CPU logic
+    - Create methods to buy hosues and unmortage
+    - Create logic to select between CPU aggressiveness
 - Test simulation mode
 - Implement single-player mode
 - test player mode
-- Cerate simulations
+- Create simulations
 
 
 Key Assumptions:
@@ -23,5 +23,8 @@ Liquidation Logic: In the case where players do have not enough cash to cover a 
 2. Monopoly properties, set by set
     - Monopolies with the least number of houses (measured by the property within each monopoly with the most houses)
     - A monopoly is fully liqudated (all properties are mortaged) before the next set is liqudated
+
+Bankruptcy Logic: A player only recieves the proceeds of a Bankruptcy if they are the sole contributor to that bankruptcy. If not, 
+the bank will recieve the assets.
 
 Otherwise, standard monopoly rules (https://www.hasbro.com/common/instruct/00009.pdf)
