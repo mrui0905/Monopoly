@@ -3,7 +3,8 @@ import board as bd
 import chance
 import community_chest
 import random
-from collections import heapq as hq
+import heapq as hq
+
 
 class Game:
     # Initializees game
@@ -146,44 +147,42 @@ class Game:
         self.Luxury_Tax.next = self.Boardwalk
 
         # Initalizes players
-        player_one = pl.Player(self.Go, 1) # initializes first player
-        player_two = pl.Player(self.Go, 2) # initializes second player
+        player_one = pl.Player(self.Go, 1, pl.prompt_mode()) # initializes first player
+        player_two = pl.Player(self.Go, 2, pl.prompt_mode()) # initializes second player
         self.players.add(player_one)
         self.players.add(player_two)
         self.turn_order.append(player_one)
         self.turn_order.append(player_two)
 
         if self.player_count > 2:
-            player_three = pl.Player(self.Go, 3) # initializes third player
+            player_three = pl.Player(self.Go, 3, pl.prompt_mode()) # initializes third player
             self.players.add(player_three)
             self.turn_order.append(player_three)
         if self.player_count > 3:
-            player_four = pl.Player(self.Go, 4) # initializes fourth player
+            player_four = pl.Player(self.Go, 4, pl.prompt_mode()) # initializes fourth player
             self.players.add(player_four)
             self.turn_order.append(player_four)
 
-
     # Prompts for number of players
     def input_num_players(self):
-        num = input('Enter the number of players (2-4)')
+        num = input('Enter the number of players (2-4): ')
         # Retries until user inputs valid number (2, 3, or 4)
-        while type(num) != int or num < 2 or num > 4:
-            num = input('Invalid Input! Please re-enter the number of players (2-4)')
+        while num not in ['2','3','4']:
+            num = input('Invalid Input! Please re-enter the number of players (2-4): ')
         return num
     
     # Prompts for player logic
     def input_player_logic(self):
-        possible = {0:'CPU Simulation'}
+        possible = {'0':'CPU Simulation'}
         print('Possible Modes are:')
-        for k,v in possible:
+        for k,v in possible.items():
             print('Select', k, 'for', v, 'mode')
         mode = input('Select a player mode: ')
         # Retries until user inputs valid mode
         while mode not in possible:
-            mode = input('Invalid Input! Please re-enter the player mode')
+            mode = input('Invalid Input! Please re-enter the player mode: ')
 
         return mode
-
 
     # Produces sum of two random integers from 1-6. Also returns boolean value 'double' which is True if the two dice values are equal.
     # Returns -1 if third consecutive double, 'self' is then sent to jail
@@ -286,7 +285,7 @@ class Game:
             return False
         return True
 
-    # Condcuts chance logic. Returns True if player is able to continue rolling (assuming double roll)
+    # Conducts chance logic. Returns True if player is able to continue rolling (assuming double roll)
     def chance(self, player):
         card = self.ch.draw()
 
@@ -402,29 +401,48 @@ class Game:
             return False
         return True
     
+    # Conducts end of turn logic, including building on and and unmortaging properties
     def end_turn(self, player):
-        not_monopoly = set() # creates set of properities not in a monopoly (will include railroads)
+        not_monopoly = set() # creates set of properties not in a monopoly (will include railroads)
         is_monopoly = set() # creates set of properties in a monopoly
 
-        base = 0.5 # NEED TO IMPLEMENT LOGIC FOR THIS, perhaps player attribute?
-        limit = int(player.money * base)
+        # sorts 'player''s properties into 'not_monopoly' and 'monopoly' sets
+        for property in player.properties:
+            if property.whole_set:
+                is_monopoly.add(property)
+            else:
+                not_monopoly.add(property)
+
+        ratios = {'Default': 0.5,
+                  'Aggressive':0.25,
+                  'Conservative':0.75} # NEED to add more ratio options
+        
+        ratio = ratios[player.aggression] if player.aggression in ratios else 0.5
+
+        limit = max(int(player.money * ratio), 500)
 
         total_sets = ['Brown', 'Light Blue', 'Purple', 'Orange', 'Red', 'Yellow', 'Green', 'Dark Blue']
+
+        # Create list of lists of monopolies, sorted by highest cost to lowest cost
         lst_is_monopoly = [sorted([property for property in is_monopoly if property.set == set], key = lambda x:(-x.cost)) for set in total_sets]
 
+        # Unmortage as many properties as we can
         for set in lst_is_monopoly:
             for property in set:
                 if property.mortaged:
-                    if not player.unmortage(property, limit): # NEED TO CREATE METHOD
+                    if not player.unmortage(property, limit):
                         break
         
-        lst_is_monopoly = [sorted([property for property in is_monopoly if property.set == set], key = lambda x:(-x.num_houses)) for set in total_sets]
+        # Create list of lists of monopolies, sorted by most expensive monopoly to least
+        lst_is_monopoly = [[property for property in is_monopoly if property.set == set] for set in total_sets]
+        lst_is_monopoly.sort(key = lambda x:-x[0].cost)
 
+        # Purchas as many houses/hotels as possible
         for set in lst_is_monopoly:
-            mortaged = False
-            
+            mortaged = False     
             hp = []
 
+            # Check if set contains mortaged properties, continue onto next set if so
             for property in set:
                 if property.mortaged:
                     mortaged = True
@@ -433,19 +451,31 @@ class Game:
             if not mortaged:
                 while hp:
                     n, p = hq.heappop(hp)
-                    if not player.buy_house(): # NEED TO CREATE METHOD
-                        break
-                    hq.heappush(hp, (n+1, p))
 
+                    # Check if player is able to build more houses/hotels
+                    if n < 4 and self.houses == 32:
+                        continue
+                    if n == 4 and self.hotels == 12:
+                        continue
+
+                    if not player.buy_house(property, limit):
+                        break
+
+                    if n != 4:
+                        hq.heappush(hp, (n+1, p))
+                        self.houses += 1
+                    else:
+                        self.hotels += 1
+                        self.houses -= 4
+
+        # Create list of properies not in a monopoly, or RR/Utility, sorted from highest to lowest cost
         lst_not_monopoly = sorted(not_monopoly, key = lambda x : -x.cost)
 
         for property in lst_not_monopoly:
             if property.mortaged:
-                player.unmortage(property, limit) # NEED TO CREATE METHOD
+                if not player.unmortage(property, limit):
+                    break
                         
-
-        
-
     # Logic once player lands on a location after a roll. Returns True if player can roll again (assuming double roll)
     def land_on_location(self, player, game, roll=0):
     # 'player' lands on a location that is not ownable
@@ -597,7 +627,8 @@ def main():
     print('Total number of turns: ', game.total_turns)
     return winner.number
     
-
+if __name__ == '__main__':
+    main()
 
 
 

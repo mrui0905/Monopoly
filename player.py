@@ -2,7 +2,7 @@ import board as bd
 
 class Player:
     # Initializes every player
-    def __init__(self, location, number):
+    def __init__(self, location, number, aggression='Default'):
         self.number = number
         self.location = location
         self.money = 1500
@@ -11,6 +11,7 @@ class Player:
         self.imprisoned = False
         self.imprisoned_count = 0
         self.rr = 0
+        self.aggression = aggression
 
     # 'self' pays 'payee' 'amount' number of dollars. Returns True if transaction goes through, returns False if insufficient funds
     def pay_to(self, payee, amount):
@@ -137,6 +138,37 @@ class Player:
                 break
 
         return self.money > amount
+    
+    # Mortages 'property' if player remains above 'limit' dollars. Returns True if property is succesfully mortaged
+    def unmortage(self, property, limit):
+        cost = int((property.cost // 2) * 1.1)
+
+        if self.money < limit + cost:
+            return False
+        
+        property.mortaged = False
+        self.money -= cost
+        return True
+    
+    # 'self' buys one house/hotel on 'property' if player remains above 'limit' dollars. Returns True if house/hotel is successfully bought
+    def buy_house(self, property, limit):
+        if self.money < limit + property.cost_of_house:
+            return False
+        
+        property.num_houses += 1
+        self.money -= property.cost_of_house
+        return True
+    
+    def prompt_mode(self):
+        modes = ['Aggressive', 'Default', 'Conservative']
+
+        print('Possible Modes: Aggressive, Default, Conservative')
+        mode = input('Input player logic: ')
+
+        while mode not in modes:
+            mode = input('Not valid. Please enter again: ')
+            
+        return mode
 
 
 
