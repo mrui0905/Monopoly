@@ -1,12 +1,6 @@
 # Monopoly'
 
 To Dos:
-- Implement CPU logic
-    - Create methods to buy hosues and unmortage
-    - Create logic to select between CPU aggressiveness
-- Test simulation mode
-- Implement single-player mode
-- test player mode
 - Create simulations
 
 
