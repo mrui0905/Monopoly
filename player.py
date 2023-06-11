@@ -42,7 +42,7 @@ class Player:
 
     # Updates all the properties owned by 'self' to ensure all monopolies are accounted for
     def update_whole_set(self):
-        master_list = {'Brown':2, 'Light Blue':3, 'Purple':3, 'Orange':3, 'Red':3, 'Yellow':3, 'Green':3, 'Dark Blue':2}
+        master_list = {'Brown':2, 'Light Blue':3, 'Purple':3, 'Orange':3, 'Red':3, 'Yellow':3, 'Green':3, 'Dark Blue':2, 'Utility':2}
         player_list = {set:0 for set in master_list}
 
         # counts how many of every set 'self' has
@@ -108,11 +108,16 @@ class Player:
                 is_monopoly.add(property)
             else:
                 not_monopoly.add(property)
+
+        monopoly_sets = {property.set for property in is_monopoly}
         
         lst_not_monopoly = sorted(not_monopoly, key = lambda x : x.cost) # list of non-monopoly properties sorted by cheapest to most expensive cost
-        # list of lists of monopoly properties grouped by set. Every inner list is sorted by number of houses (largest first) then cost. Inner lists are then sorted by largest number of houses
-        lst_is_monopoly = [sorted([property for property in is_monopoly if property.set == set], key = lambda x:(-x.houses, x.cost)) for set in total_sets]
-        lst_is_monopoly.sort(key = lambda x:x[0].houses)
+        if is_monopoly:
+             # list of lists of monopoly properties grouped by set. Every inner list is sorted by number of houses (largest first) then cost. Inner lists are then sorted by largest number of houses
+            lst_is_monopoly = [sorted([property for property in is_monopoly if property.set == set], key = lambda x:(-x.num_houses, x.cost)) for set in monopoly_sets]
+            lst_is_monopoly.sort(key = lambda x:-x[0].num_houses)
+        else:
+            lst_is_monopoly = []
 
         i, j = 0, 0 #pointer that will traverse 'not_monopoly' and 'is_monopoly'
 
@@ -124,7 +129,7 @@ class Player:
                 i += 1
             elif j < len(lst_is_monopoly):
             # Monopoly assets are liquidated set by set, from most houses to least house until all properties are mortaged
-                for k in range(lst_is_monopoly[j][0].houses + 1):
+                for k in range(lst_is_monopoly[j][0].num_houses + 1):
                     for property in lst_is_monopoly[j]:
                         if self.money > amount:
                             break
@@ -159,16 +164,7 @@ class Player:
         self.money -= property.cost_of_house
         return True
     
-    def prompt_mode(self):
-        modes = ['Aggressive', 'Default', 'Conservative']
-
-        print('Possible Modes: Aggressive, Default, Conservative')
-        mode = input('Input player logic: ')
-
-        while mode not in modes:
-            mode = input('Not valid. Please enter again: ')
-            
-        return mode
+    
 
 
 

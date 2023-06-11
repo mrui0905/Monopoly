@@ -9,7 +9,7 @@ import heapq as hq
 class Game:
     # Initializees game
     def __init__(self):
-        self.player_count = self.input_num_players() # Number of players
+        self.player_count =  self.input_num_players() # Number of players
         self.players_alive = self.player_count # Number of players alive, initially set to self.player_count, game ends with self.players_alive == 1
 
         self.players = set() # set of alive players
@@ -35,7 +35,7 @@ class Game:
         self.Community_Chest_One = bd.Board(None, 'Special')
         self.Mediterranean.next = self.Community_Chest_One
 
-        self.Baltic = bd.Board(None, 'Brown', 60, 4, 50, 8, 20, 60, 60, 180, 320, 450)
+        self.Baltic = bd.Board(None, 'Brown', 60, 4, 50, 20, 60, 180, 320, 450)
         self.Community_Chest_One.next = self.Baltic
 
         self.Income_Tax = bd.Board(None, 'Special')
@@ -119,10 +119,10 @@ class Game:
         self.Go_To_Jail = bd.Board(None, 'Special')
         self.Marvin_Gardens.next = self.Go_To_Jail
 
-        self.Pacific = bd.Board(None, 'Green', 300, 26, 200, 52, 130, 390, 900, 1100, 1275)
+        self.Pacific = bd.Board(None, 'Green', 300, 26, 200, 130, 390, 900, 1100, 1275)
         self.Go_To_Jail.next = self.Pacific
 
-        self.North_Carolina = bd.Board(None, 'Green', 300, 26, 200, 52, 130, 390, 900, 1100, 1275)
+        self.North_Carolina = bd.Board(None, 'Green', 300, 26, 200, 130, 390, 900, 1100, 1275)
         self.Pacific.next = self.North_Carolina
 
         self.Community_Chest_Three = bd.Board(None, 'Special')
@@ -147,19 +147,19 @@ class Game:
         self.Luxury_Tax.next = self.Boardwalk
 
         # Initalizes players
-        player_one = pl.Player(self.Go, 1, pl.prompt_mode()) # initializes first player
-        player_two = pl.Player(self.Go, 2, pl.prompt_mode()) # initializes second player
+        player_one = pl.Player(self.Go, 1, self.prompt_mode()) # initializes first player
+        player_two = pl.Player(self.Go, 2, self.prompt_mode()) # initializes second player
         self.players.add(player_one)
         self.players.add(player_two)
         self.turn_order.append(player_one)
         self.turn_order.append(player_two)
 
         if self.player_count > 2:
-            player_three = pl.Player(self.Go, 3, pl.prompt_mode()) # initializes third player
+            player_three = pl.Player(self.Go, 3, self.prompt_mode()) # initializes third player
             self.players.add(player_three)
             self.turn_order.append(player_three)
         if self.player_count > 3:
-            player_four = pl.Player(self.Go, 4, pl.prompt_mode()) # initializes fourth player
+            player_four = pl.Player(self.Go, 4, self.prompt_mode()) # initializes fourth player
             self.players.add(player_four)
             self.turn_order.append(player_four)
 
@@ -169,7 +169,18 @@ class Game:
         # Retries until user inputs valid number (2, 3, or 4)
         while num not in ['2','3','4']:
             num = input('Invalid Input! Please re-enter the number of players (2-4): ')
-        return num
+        return int(num)
+    
+    def prompt_mode(self):
+        modes = ['Aggressive', 'Default', 'Conservative']
+
+        print('Possible Modes: Aggressive, Default, Conservative')
+        mode = input('Input player logic: ')
+
+        while mode not in modes:
+            mode = input('Not valid. Please enter again: ')
+            
+        return mode
     
     # Prompts for player logic
     def input_player_logic(self):
@@ -182,7 +193,7 @@ class Game:
         while mode not in possible:
             mode = input('Invalid Input! Please re-enter the player mode: ')
 
-        return mode
+        return int(mode)
 
     # Produces sum of two random integers from 1-6. Also returns boolean value 'double' which is True if the two dice values are equal.
     # Returns -1 if third consecutive double, 'self' is then sent to jail
@@ -202,7 +213,7 @@ class Game:
     # In a standard game of monopoly, every player rolls a dice and the highest player starts first. In essence, all players are equally likely
     # to move first, thus this method simply randomly chooses one player to go first.
     def determine_order_of_play(self):
-        return random.randint(0,3)
+        return random.randint(0,self.player_count-1)
     
     # Removes player from the game and declares bankruptcy
     def dies(self, player, debtor='Bank'):
@@ -210,7 +221,7 @@ class Game:
         self.players.remove(player)
         self.dead_players.add(player)
         
-        player.bankrupt(player, debtor)
+        player.bankrupt(debtor)
         return
     
     # All players except 'player' pay 'player' 'amount'.
@@ -239,7 +250,7 @@ class Game:
         card = self.cc.draw()
 
         if card == 0: # Get of Jail Free Card
-            player.jail.card.add('cc')
+            player.jail_card.add('cc')
             self.cc.jail = True
         if card == 1: # Advance to Go
             player.location = self.Go
@@ -249,9 +260,9 @@ class Game:
         if card == 3: # Doctor's Fee
             self.pay_to_bank(player, 50)
         if card == 4: # Sale of Stock
-            self.money += 50
+            player.money += 50
         if card == 5: # Go to Jail
-            player.go_to_jail(self.jail)
+            player.go_to_jail(self.Jail)
         if card == 6: # Grand Opera Night
             self.collect_from_all(player, 50)
         if card == 7: # Christmas
@@ -261,13 +272,13 @@ class Game:
         if card == 9: # Birthday
             self.collect_from_all(player, 10)
         if card == 10: # Life Insurance Matures
-            self.money += 100
+            player.money += 100
         if card == 11: # Hospital Fees
             self.pay_to_bank(player, 50)
         if card == 12: # School Fees
             self.pay_to_bank(player, 50)
         if card == 13: # Consultancy Fee
-            self.money += 25
+            player.money += 25
         if card == 14: # Street Repairs
             houses, hotels = 0, 0
             for property in player.properties:
@@ -277,9 +288,9 @@ class Game:
                     hotels += 1
             self.pay_to_bank(player, 40*houses + 115 * hotels)
         if card == 15: # Beauty Contest
-            self.money += 10
+            player.money += 10
         if card == 16: # Inheritance
-            self.money += 100
+            player.money += 100
 
         if player in self.dead_players or player.imprisoned:
             return False
@@ -290,13 +301,13 @@ class Game:
         card = self.ch.draw()
 
         if card == 0: # Get out of Jail Free
-            player.jail.card.add('chance')
+            player.jail_card.add('chance')
             self.ch.jail = True
-        if card == 1: # Advnace to Go
+        if card == 1: # Advance to Go
             player.location = self.Go
             player.money += 200
         if card == 2: # Advance to Illinois
-            while player.location != self.Illinois:
+            while not player.location is self.Illinois:
                 player.location = player.location.next
 
                 if player.location is self.Go:
@@ -304,8 +315,8 @@ class Game:
 
             if not self.land_on_location(player, self):
                 return False
-        if card == 3: #Advnace to St. Charles
-            while player.location != self.St_Charles:
+        if card == 3: #Advance to St. Charles
+            while not player.location is self.St_Charles:
                 player.location = player.location.next
 
                 if player.location is self.Go:
@@ -360,7 +371,7 @@ class Game:
             if not self.land_on_location(player, self):
                 return False
         if card == 8: # Go to Jail
-            player.go_to_jail(self.jail)
+            player.go_to_jail(self.Jail)
         if card == 9: # General Repairs
             houses, hotels = 0, 0
             for property in player.properties:
@@ -369,8 +380,8 @@ class Game:
                     houses -= 1
                     hotels += 1
             self.pay_to_bank(player, 25*houses + 100 * hotels)
-        if card == 10: # Advnace to Reading Railroad
-            while player.location != self.Reading:
+        if card == 10: # Advance to Reading Railroad
+            while not player.location is self.Reading:
                 player.location = player.location.next
 
                 if player.location is self.Go:
@@ -379,7 +390,7 @@ class Game:
             if not self.land_on_location(player, self):
                 return False
         if card == 11: # Advance to Boardwalk
-            while player.location != self.Boardwalk:
+            while not player.location is self.Boardwalk:
                 player.location = player.location.next
 
                 if player.location is self.Go:
@@ -395,7 +406,7 @@ class Game:
                     continue
                 player.money += 50
         if card == 13: # Building matures
-            self.money += 150
+            player.money += 150
         
         if player in self.dead_players or player.imprisoned:
             return False
@@ -424,26 +435,26 @@ class Game:
         total_sets = ['Brown', 'Light Blue', 'Purple', 'Orange', 'Red', 'Yellow', 'Green', 'Dark Blue']
 
         # Create list of lists of monopolies, sorted by highest cost to lowest cost
-        lst_is_monopoly = [sorted([property for property in is_monopoly if property.set == set], key = lambda x:(-x.cost)) for set in total_sets]
+        lst_is_monopoly = [sorted([property for property in is_monopoly if property.set == s], key = lambda x:(-x.cost)) for s in total_sets]
 
         # Unmortage as many properties as we can
-        for set in lst_is_monopoly:
-            for property in set:
+        for s in lst_is_monopoly:
+            for property in s:
                 if property.mortaged:
                     if not player.unmortage(property, limit):
                         break
         
         # Create list of lists of monopolies, sorted by most expensive monopoly to least
-        lst_is_monopoly = [[property for property in is_monopoly if property.set == set] for set in total_sets]
-        lst_is_monopoly.sort(key = lambda x:-x[0].cost)
+        lst_is_monopoly = [[property for property in is_monopoly if property.set == s] for s in total_sets]
+        lst_is_monopoly = lst_is_monopoly[::-1]
 
         # Purchas as many houses/hotels as possible
-        for set in lst_is_monopoly:
+        for s in lst_is_monopoly:
             mortaged = False     
             hp = []
 
             # Check if set contains mortaged properties, continue onto next set if so
-            for property in set:
+            for property in s:
                 if property.mortaged:
                     mortaged = True
                     break
@@ -512,7 +523,7 @@ class Game:
         else:
             # 'player' pays no rent if the property is mortaged
             if player.location.mortaged:
-                pass
+                rent = 0
             # 'player' lands on a Utiliy
             elif player.location.set == 'Utilites':
                 if player.location.whole_set:
@@ -548,15 +559,17 @@ class Game:
         return True
     
 
-def main():
+def main(limit_turns):
     print('Welcome to Monopoly!')
 
     game = Game() # creates game
 
     turn = game.determine_order_of_play() # determines player that goes first
 
-    while game.players_alive > 1:
+    while game.players_alive > 1 and game.total_turns < limit_turns:
+        print(game.total_turns)
         curr_player = game.turn_order[turn]
+        print(curr_player.location.set)
 
         # checking if curr_player has been eliminated. If so, game continues onto next player
         if curr_player in game.dead_players: 
@@ -574,7 +587,7 @@ def main():
         for roll in rolls:
             # checks if 'curr_player' received 3 consecutive doubles. If so, 'curr_player' is sent to jail
             if roll == -1:
-                curr_player.go_to_jail(game.jail)
+                curr_player.go_to_jail(game.Jail)
                 break
             
             # checks if 'curr_player' begins their turn imprisoned.
@@ -608,7 +621,7 @@ def main():
             for _ in range(roll):
                 curr_player.location = curr_player.location.next
                 if curr_player.location == game.Go: # 'curr_player' receives $200 for passing go
-                    curr_player += 200
+                    curr_player.money += 200
 
             if not game.land_on_location(curr_player, game, roll):
                 break
@@ -622,13 +635,15 @@ def main():
         turn = turn % game.player_count
         game.total_turns += 1
 
-    winner = list(game.players)[0]
+    winner = sorted(game.players, key = lambda x:-x.money)[0]
     print('Winner is Player', winner.number)
     print('Total number of turns: ', game.total_turns)
+    for player in game.players:
+        print('Player ' + str(player.number) + ' had $' + str(player.money))
     return winner.number
     
 if __name__ == '__main__':
-    main()
+    main(250)
 
 
 

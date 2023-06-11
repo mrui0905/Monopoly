@@ -2,7 +2,7 @@ import player as pl
 
 class Board:
     # Initializes each location on the monopoly board
-    def __init__(self, next, set, cost, rent, cost_of_house, one_house, two_houses, three_houses, four_houses, hotel):
+    def __init__(self, next, set, cost=0, rent=0, cost_of_house=0, one_house=0, two_houses=0, three_houses=0, four_houses=0, hotel=0):
         self.cost = cost # cost to buy location
         self.next = next # following location
         self.set = set # set each location belongs too: 'Special', 'Utility', 'Brown', 'Light Blue', 'Purple', 'Orange', 'Red', 'Yellow', 'Green', 'Dark Blue', 'RR'
@@ -19,13 +19,14 @@ class Board:
         self.hotel = hotel # cost of rent with a hotel
         self.num_houses = 0 # number of houses/hotels. 5 if hotel
 
-        # Initalizes all 38 locations
-        self.create_board()
+    def __lt__(self, other):
+        return self
+    
+    def __gt__(self, other):
+        return self
 
     # Transfer ownership of a property to player
     def change_ownership(self, player):
         self.owner = player
         if not self.unowned:
             self.unowned = False
-
-
