@@ -13,14 +13,14 @@ class Community_Chest:
         # Draws a card
         num = self.order[self.idx]
 
-        self.idx != 1
+        self.idx += 1
         self.idx = self.idx % 17
         
         # Draws next card if Get out of Jail card is impossibly drawn
         if num == 0 and self.jail:
             num = self.order[self.idx]
 
-            self.idx != 1
+            self.idx += 1
             self.idx = self.idx % 17
 
         return num

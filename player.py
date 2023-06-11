@@ -83,7 +83,7 @@ class Player:
                 property.whole_set = False
                 property.num_houses = 0
             debtor.update_whole_set() #updates debtor's monopolies to include new monopolies
-            debtor.jail_card += self.jail_card
+            debtor.jail_card |= self.jail_card
             debtor.money += self.money
 
         self.location = None
@@ -139,6 +139,7 @@ class Player:
                         elif not property.mortaged:
                             property.mortaged = True
                             self.money += property.cost // 2
+                j+=1
             else:
                 break
 
