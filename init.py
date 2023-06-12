@@ -10,6 +10,8 @@ import pandas as pd
 class Game:
     # Initializees game
     def __init__(self, game_mode=None, player_modes=None):
+        self.property_count = {n:0 for n in range(40)}
+
         self.player_count =  self.input_num_players(player_modes) # Number of players
         self.players_alive = self.player_count # Number of players alive, initially set to self.player_count, game ends with self.players_alive == 1
 
@@ -236,7 +238,8 @@ class Game:
     
     # All players except 'player' pay 'player' 'amount'.
     def collect_from_all(self, player, amount):
-        for p in self.players:
+        players = self.players.copy()
+        for p in players:
             if player is p:
                 continue
             if not p.pay_to(player, amount):
@@ -259,8 +262,8 @@ class Game:
     def community_chest(self, player):
         card = self.cc.draw()
 
-        print('cc')
-        print(card)
+        #print('cc')
+        #print(card)
 
         if card == 0: # Get of Jail Free Card
             player.jail_card.add('cc')
@@ -312,8 +315,8 @@ class Game:
     # Conducts chance logic. Returns True if player is able to continue rolling (assuming double roll)
     def chance(self, player):
         card = self.ch.draw()
-        print('chance')
-        print(card)
+        #print('chance')
+        #print(card)
 
         if card == 0: # Get out of Jail Free
             player.jail_card.add('chance')
@@ -567,7 +570,7 @@ class Game:
     
 
 def main(limit_turns, game_mode=None, player_modes=None):
-    print('Welcome to Monopoly!')
+    #print('Welcome to Monopoly!')
 
     game = Game(game_mode, player_modes) # creates game
 
@@ -576,7 +579,7 @@ def main(limit_turns, game_mode=None, player_modes=None):
     while game.players_alive > 1 and game.total_turns < limit_turns:
         curr_player = game.turn_order[turn]
 
-        print(curr_player.location.number)
+        #print(curr_player.location.number)
 
         # checking if curr_player has been eliminated. If so, game continues onto next player
         if curr_player in game.dead_players: 
@@ -591,7 +594,7 @@ def main(limit_turns, game_mode=None, player_modes=None):
             roll, double = game.dice_roll(len(rolls))
             rolls.append(roll)
 
-        print(rolls)
+        #print(rolls)
 
         for roll in rolls:
             # checks if 'curr_player' received 3 consecutive doubles. If so, 'curr_player' is sent to jail
@@ -632,6 +635,8 @@ def main(limit_turns, game_mode=None, player_modes=None):
                 if curr_player.location == game.Go: # 'curr_player' receives $200 for passing go
                     curr_player.money += 200
 
+            game.property_count[curr_player.location.number] += 1
+
             if not game.land_on_location(curr_player, roll):
                 break
         
@@ -645,11 +650,11 @@ def main(limit_turns, game_mode=None, player_modes=None):
         game.total_turns += 1
 
     winner = sorted(game.players, key = lambda x:-x.money)[0]
-    print('Winner is Player', winner.number)
-    print('Total number of turns: ', game.total_turns)
-    for player in game.players:
-        print('Player ' + str(player.number) + ' had $' + str(player.money))
-    return winner.number
+    #print('Winner is Player', winner.number)
+    #print('Total number of turns: ', game.total_turns)
+    #for player in game.players:
+        #print('Player ' + str(player.number) + ' had $' + str(player.money))
+    return game.property_count
     
 #if __name__ == '__main__':
    # main(250)
