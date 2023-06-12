@@ -597,6 +597,8 @@ def main(limit_turns, game_mode=None, player_modes=None):
         #print(rolls)
 
         for roll in rolls:
+            game.property_count[curr_player.location.number] += 1
+
             # checks if 'curr_player' received 3 consecutive doubles. If so, 'curr_player' is sent to jail
             if roll == -1:
                 curr_player.go_to_jail(game.Jail)
@@ -635,7 +637,6 @@ def main(limit_turns, game_mode=None, player_modes=None):
                 if curr_player.location == game.Go: # 'curr_player' receives $200 for passing go
                     curr_player.money += 200
 
-            game.property_count[curr_player.location.number] += 1
 
             if not game.land_on_location(curr_player, roll):
                 break
