@@ -427,6 +427,11 @@ class Game:
         not_monopoly = set() # creates set of properties not in a monopoly (will include railroads and utilites)
         is_monopoly = set() # creates set of properties in a monopoly
 
+        # TO DO: IMPLEMENT TRADE LOGIC:
+
+
+        
+
         # sorts 'player''s properties into 'not_monopoly' and 'monopoly' sets
         for property in player.properties:
             if property.whole_set and property.set != 'Utility':
@@ -435,12 +440,14 @@ class Game:
                 not_monopoly.add(property)
 
         ratios = {'Default': 0.5,
-                  'Aggressive':0.25,
-                  'Conservative':0.75} # NEED to add more ratio options
+                  'Aggressive':0.1,
+                  'Conservative':0.9} # NEED to add more ratio options
         
         ratio = ratios[player.aggression] if player.aggression in ratios else 0.5
 
-        limit = min(max(int(player.money * ratio), 400),1000)
+        #limit = min(max(int(player.money * ratio), 400),1000)
+
+        limit = int(player.money * ratio)
 
         total_sets = ['Brown', 'Light Blue', 'Purple', 'Orange', 'Red', 'Yellow', 'Green', 'Dark Blue']
 
@@ -655,7 +662,8 @@ def main(limit_turns, game_mode=None, player_modes=None):
     #print('Total number of turns: ', game.total_turns)
     #for player in game.players:
         #print('Player ' + str(player.number) + ' had $' + str(player.money))
-    return game.property_count
+    #return game.property_count
+    return winner.number
     
 #if __name__ == '__main__':
    # main(250)

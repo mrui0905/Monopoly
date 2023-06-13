@@ -89,7 +89,7 @@ class Player:
         self.location = None
         self.money = 0
         self.properties.clear()
-        self.jail_card = 0
+        self.jail_card = set()
         self.imprisoned = False
         self.imprisoned_count = 0
         self.rr = 0

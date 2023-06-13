@@ -1,7 +1,8 @@
 # Monopoly'
 
 To Dos:
-- Create simulations
+- Create basic trade logic (game.end_turn())
+- Simulate aggression
 
 
 Key Assumptions:
