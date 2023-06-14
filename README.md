@@ -1,9 +1,7 @@
 # Monopoly'
 
-To Dos:
-- Create basic trade logic (game.end_turn())
-- Simulate aggression
-
+To do:
+- update ReadMe
 
 Key Assumptions:
 

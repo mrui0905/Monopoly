@@ -422,15 +422,114 @@ class Game:
             return False
         return True
     
+    # Conducts trades if suitable to all parties and keeps player above their limit
+    def trade(self, player, limit):
+        # Edge case: player has no properties
+        if not player.properties:
+            return
+
+        # Ensure player sets are updated
+        player.update_whole_set()
+
+        # Check for how many sets 'player' is missing only one property from completing
+        master_list = {'Brown':2, 'Light Blue':3, 'Purple':3, 'Orange':3, 'Red':3, 'Yellow':3, 'Green':3, 'Dark Blue':2, 'Utility':2}
+        player_list = {set:0 for set in master_list}
+
+        for property in player.properties:
+            if property.whole_set:
+                if property.set in player_list:
+                    del player_list[property.set]
+            elif property.set == 'RR':
+                continue
+            else:
+                player_list[property.set] += 1
+
+        # Sort sets into either missing one or missing two locations
+        missing_one = set()
+        missing_two = set()
+
+        for k, v in player_list.items():
+            if v == master_list[k] - 1:
+                missing_one.add(k)
+            if v == master_list[k] - 2:
+                missing_two.add(k)
+
+        missing_two_list = [p for p in player.properties if p.set in missing_two]
+
+        missing_two_list.sort(key = lambda x:x.cost)
+
+        curr = self.Go
+        
+        traded = False
+        # Initiating possible trades 
+        if missing_two_list and missing_one:
+            for _ in range(40):
+                # Suitable property to be traded : 'curr'
+                if curr.set in missing_one and not curr.unowned and curr.owner is not player:
+                    traded_property = missing_two_list.pop() # property that will be traded for 'curr'
+
+                    # check if 'traded_property' will fill a set for other player
+                    other_count = 0
+                    for p in curr.owner.properties:
+                        if p.set == traded_property.set:
+                            other_count += 1
+
+                    # calculates 'cash' amount that player will also pay to complete trade
+                    if other_count + 1 == master_list[traded_property.set]:
+                        cash = curr.cost - traded_property.cost
+                    else:
+                        cash = 2 * curr.cost - traded_property.cost
+
+                    # if player doesn't have enough money, trade is prevented
+                    if player.money - cash < limit:
+                        missing_two_list.append(traded_property)
+                        continue
+                    
+                    # traded_property switches owner
+                    traded_property.owner = curr.owner
+
+                    player.properties.remove(traded_property)
+                    curr.owner.properties.add(traded_property)
+
+                    # money is exchanged
+                    player.money -= cash
+                    curr.owner.money += cash
+
+                    # curr switches owner
+                    curr.owner = player
+                    player.properties.add(curr)
+                    traded_property.owner.properties.remove(curr)
+
+                    # tracks if trades occured
+                    traded = True
+
+                    # if player has no more tradable properties, end trade logic
+                    if not missing_two_list:
+                        break
+                curr = curr.next
+            
+            if traded:
+                player.update_whole_set()
+        return
+
     # Conducts end of turn logic, including building on and and unmortaging properties
     def end_turn(self, player):
+        # Calculates limit that player can't go below
+        ratios = {'Default': 0.5,
+                  'Aggressive':0.15,
+                  'Conservative':0.85} # NEED to add more ratio options
+        
+        ratio = ratios[player.aggression] if player.aggression in ratios else 0.5
+
+        #limit = min(max(int(player.money * ratio), 400),1000)
+
+        limit = int(player.money * ratio)
+
+        # Player initiates trades
+        self.trade(player, limit)
+
         not_monopoly = set() # creates set of properties not in a monopoly (will include railroads and utilites)
         is_monopoly = set() # creates set of properties in a monopoly
-
-        # TO DO: IMPLEMENT TRADE LOGIC:
-
-
-        
 
         # sorts 'player''s properties into 'not_monopoly' and 'monopoly' sets
         for property in player.properties:
@@ -438,16 +537,6 @@ class Game:
                 is_monopoly.add(property)
             else:
                 not_monopoly.add(property)
-
-        ratios = {'Default': 0.5,
-                  'Aggressive':0.1,
-                  'Conservative':0.9} # NEED to add more ratio options
-        
-        ratio = ratios[player.aggression] if player.aggression in ratios else 0.5
-
-        #limit = min(max(int(player.money * ratio), 400),1000)
-
-        limit = int(player.money * ratio)
 
         total_sets = ['Brown', 'Light Blue', 'Purple', 'Orange', 'Red', 'Yellow', 'Green', 'Dark Blue']
 
