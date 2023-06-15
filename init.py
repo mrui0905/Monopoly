@@ -179,7 +179,7 @@ class Game:
     
     def prompt_mode(self, player_modes, player_number):
         if player_modes:
-            return player_modes[player_number-1]
+            return player_modes[player_number-1] if isinstance(player_modes[player_number-1], float) else 'Default'
 
         modes = ['Aggressive', 'Default', 'Conservative']
 
@@ -519,7 +519,7 @@ class Game:
                   'Aggressive':0.15,
                   'Conservative':0.85} # NEED to add more ratio options
         
-        ratio = ratios[player.aggression] if player.aggression in ratios else 0.5
+        ratio = ratios[player.aggression] if player.aggression in ratios else player.aggression
 
         #limit = min(max(int(player.money * ratio), 400),1000)
 
