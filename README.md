@@ -1,4 +1,4 @@
-# Monopoly'
+# Monopoly
 
 This repository includes a simulation of Monopoly, as well as three studies into optimal monopoly strategy.
 
