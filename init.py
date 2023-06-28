@@ -4,8 +4,49 @@ import chance
 import community_chest
 import random
 import heapq as hq
-import pandas as pd
 
+name = {
+    0:'Go',
+    1:'Mediterranean',
+    2:'Community Chance 1',
+    3:'Baltic',
+    4:'Income Tax',
+    5:'Reading RR',
+    6:'Oriental',
+    7:'Chance 1',
+    8:'Vermont',
+    9:'Connecticut',
+    10:'Jail',
+    11:'St. Charles',
+    12:'Electric Company',
+    13:'States',
+    14:'Virginia',
+    15:'Pennsylvania RR',
+    16:'St. James',
+    17:'Community Chest 2',
+    18:'Tennessee',
+    19:'New York',
+    20:'Free Parking',
+    21:'Kentucky',
+    22:'Chance 2',
+    23:'Indiana',
+    24:'Illinois',
+    25:'B & O RR',
+    26:'Atlantic',
+    27:'Ventnor',
+    28:'Water Works',
+    29:'Marvin Gardens',
+    30:'Go to Jail',
+    31:'Pacific',
+    32:'North Carolina',
+    33:'Community Chest 3',
+    34:'Pennsylvania',
+    35:'Short Line RR',
+    36:'Chance 3',
+    37:'Park Place',
+    38:'Luxury Tax',
+    39:"Boardwalk"
+}
 
 class Game:
     # Initializees game
@@ -150,7 +191,10 @@ class Game:
         self.Luxury_Tax.next = self.Boardwalk
 
         # Initalizes players
-        player_one = pl.Player(self.Go, 1, self.prompt_mode(player_modes, 1)) # initializes first player
+        if self.mode == 0:
+            player_one = pl.Player(self.Go, 1, self.prompt_mode(player_modes, 1)) # initializes first player
+        else:
+            player_one = pl.Player(self.Go, 1, 0)
         player_two = pl.Player(self.Go, 2, self.prompt_mode(player_modes, 2)) # initializes second player
         self.players.add(player_one)
         self.players.add(player_two)
@@ -196,7 +240,7 @@ class Game:
         if game_mode is not None:
             return game_mode
 
-        possible = {'0':'CPU Simulation'}
+        possible = {'0':'CPU Simulation', '1':'Player against CPU'}
         print('Possible Modes are:')
         for k,v in possible.items():
             print('Select', k, 'for', v, 'mode')
@@ -228,7 +272,8 @@ class Game:
         return random.randint(0,self.player_count-1)
     
     # Removes player from the game and declares bankruptcy
-    def dies(self, player, debtor='Bank'):
+    def dies(self, player, debtor='Bank', user=False):
+        if user: print('Player ', str(player.number), ' has declared bankruptcy.')
         self.players_alive -= 1
         self.players.remove(player)
         self.dead_players.add(player)
@@ -259,43 +304,59 @@ class Game:
         return False 
     
     # Condcuts communnity chest logic. Returns True if player is able to continue rolling (assuming double roll)
-    def community_chest(self, player):
+    def community_chest(self, player, user=False):
         card = self.cc.draw()
 
+        if user: print("Community Chest!")
         #print('cc')
         #print(card)
 
         if card == 0: # Get of Jail Free Card
+            if user: print("Get of Jail Free Card")
             player.jail_card.add('cc')
             self.cc.jail = True
         if card == 1: # Advance to Go
+            if user: print("Advance to Go")
             player.location = self.Go
             player.money += 200
         if card == 2: # Bank Error
+            if user: print("Bank Error")
             player.money += 200
         if card == 3: # Doctor's Fee
+            if user: print("Doctor's Fee")
             self.pay_to_bank(player, 50)
         if card == 4: # Sale of Stock
+            if user: print("Sale of Stock")
             player.money += 50
         if card == 5: # Go to Jail
+            if user: print("Go to Jail")
             player.go_to_jail(self.Jail)
         if card == 6: # Grand Opera Night
+            if user: print("Grand Opera Night")
             self.collect_from_all(player, 50)
         if card == 7: # Christmas
+            if user: print("Christmas")
             player.money += 100
         if card == 8: # Income Tax Refund
+            if user: print("Income Tax Refund")
             player.money += 20
         if card == 9: # Birthday
+            if user: print("Birthday")
             self.collect_from_all(player, 10)
         if card == 10: # Life Insurance Matures
+            if user: print("Life Insurance Matures")
             player.money += 100
         if card == 11: # Hospital Fees
+            if user: print("Hospital Fees")
             self.pay_to_bank(player, 50)
         if card == 12: # School Fees
+            if user: print("School Fees")
             self.pay_to_bank(player, 50)
         if card == 13: # Consultancy Fee
+            if user: print("Consultancy Fee")
             player.money += 25
         if card == 14: # Street Repairs
+            if user: print("Street Repairs")
             houses, hotels = 0, 0
             for property in player.properties:
                 houses += property.num_houses
@@ -304,8 +365,10 @@ class Game:
                     hotels += 1
             self.pay_to_bank(player, 40*houses + 115 * hotels)
         if card == 15: # Beauty Contest
+            if user: print("Beauty Contest")
             player.money += 10
         if card == 16: # Inheritance
+            if user: print("Inheritance")
             player.money += 100
 
         if player in self.dead_players or player.imprisoned:
@@ -313,32 +376,38 @@ class Game:
         return True
 
     # Conducts chance logic. Returns True if player is able to continue rolling (assuming double roll)
-    def chance(self, player):
+    def chance(self, player, user=False):
+        if user: print("Chance!")
         card = self.ch.draw()
         #print('chance')
         #print(card)
 
         if card == 0: # Get out of Jail Free
+            if user: print("Get out of Jail Free")
             player.jail_card.add('chance')
             self.ch.jail = True
         if card == 1: # Advance to Go
+            if user: print("Advance to Go")
             player.location = self.Go
             player.money += 200
         if card == 2: # Advance to Illinois
+            if user: print("Advance to Illinois")
             if player.location.number > self.Illinois.number:
                 player.money += 200
             player.location = self.Illinois
 
-            if not self.land_on_location(player):
+            if not self.land_on_location(player, user):
                 return False
         if card == 3: #Advance to St. Charles
+            if user: print("Advance to St. Charles")
             if player.location.number > self.St_Charles.number:
                 player.money += 200
             player.location = self.St_Charles
 
-            if not self.land_on_location(player):
+            if not self.land_on_location(player, user):
                 return False
         if card == 4: # Advance to nearest Utility.
+            if user: print("Advance to nearest Utility")
             while player.location.set != 'Utility':
                 player.location = player.location.next
 
@@ -358,6 +427,7 @@ class Game:
                         return False
                     player.pay_to(player.location.owner, rent)
         if card == 5: # Advance to nearest Railroad
+            if user: print("Advance to nearest Railroad")
             while player.location.set != 'RR':
                 player.location = player.location.next
 
@@ -377,16 +447,20 @@ class Game:
                         return False
                     player.pay_to(player.location.owner, rent)
         if card == 6: # Bank Dividend
+            if user: print("Bank Dividend")
             player.money += 50
         if card == 7: # Go back 3 spaces
+            if user: print("Go back 3 spaces")
             for _ in range(37):
                 player.location = player.location.next
 
-            if not self.land_on_location(player):
+            if not self.land_on_location(player, user):
                 return False
         if card == 8: # Go to Jail
+            if user: print("Go back Jail")
             player.go_to_jail(self.Jail)
         if card == 9: # General Repairs
+            if user: print("General Repairs")
             houses, hotels = 0, 0
             for property in player.properties:
                 houses += property.num_houses
@@ -395,20 +469,23 @@ class Game:
                     hotels += 1
             self.pay_to_bank(player, 25*houses + 100 * hotels)
         if card == 10: # Advance to Reading Railroad
+            if user: print("Advance to Reading Railroad")
             if player.location.number > self.Reading.number:
                 player.money += 200
             player.location = self.Reading
 
-            if not self.land_on_location(player):
+            if not self.land_on_location(player, user):
                 return False
         if card == 11: # Advance to Boardwalk
+            if user: print("Advance to Boardwalk")
             if player.location.number > self.Boardwalk.number:
                 player.money += 200
             player.location = self.Boardwalk
 
-            if not self.land_on_location(player):
+            if not self.land_on_location(player, user):
                 return False
         if card == 12: # Chairman of the board
+            if user: print("Chairman of the board")
             # Player first pays 50 per player to bank (in case player doesn't have enough), then bank pays to each player
             self.pay_to_bank(player, 50*(self.players_alive -1))
             for p in self.players:
@@ -416,6 +493,7 @@ class Game:
                     continue
                 player.money += 50
         if card == 13: # Building matures
+            if user: print("Building matures")
             player.money += 150
         
         if player in self.dead_players or player.imprisoned:
@@ -513,7 +591,7 @@ class Game:
         return
 
     # Conducts end of turn logic, including building on and and unmortaging properties
-    def end_turn(self, player):
+    def end_turn(self, player, user=False):
         # Calculates limit that player can't go below
         ratios = {'Default': 0.5,
                   'Aggressive':0.15,
@@ -594,37 +672,54 @@ class Game:
                     break
                         
     # Logic once player lands on a location after a roll. Returns True if player can roll again (assuming double roll)
-    def land_on_location(self, player, roll=0):
-    # 'player' lands on a location that is not ownable
+    def land_on_location(self, player, roll=0, user=False):
+        if user: print("You landed on ", name[player.location.number])
+        # 'player' lands on a location that is not ownable
         if player.location.set == 'Special':
             # player lands on Go, Free Parking, or Jail
             if player.location is self.Go or player.location is self.Free_Parking or player.location is self.Jail:
                 pass
             # player lands on a Community Chest
             elif player.location is self.Community_Chest_One or player.location is self.Community_Chest_Two or player.location is self.Community_Chest_Three:
-                if not self.community_chest(player):
+                if not self.community_chest(player, user):
                     return False
             # player lands on a Chance
             elif player.location is self.Chance_One or player.location is self.Chance_Two or player.location is self.Chance_Three:
-                if not self.chance(player):
+                if not self.chance(player, user):
                     return False
             # player lands on Income Tax
             elif player.location is self.Income_Tax:
+                if user: print("Income tax, pay 200!")
                 if not self.pay_to_bank(player, 200):
                     return False
             # player lands on Luxury Tax
             elif player.location is self.Luxury_Tax:
+                if user: print("Luxury Tax, pay 100!")
                 if not self.pay_to_bank(player, 100):
                     return False
             # player lands on Go To Jail
             else:
+                if user: print("Go to Jail!")
                 player.go_to_jail(self.Jail)
                 return False
         # 'player' lands on unowned property
         elif not player.location.owner:
-            if player.money >= player.location.cost:
+            if user:
+                print("This property is unowned. It costs $" + str(player.location.cost) + ". Do you wish to buy?")
+                select = input('Select 0 to buy, 1 to not buy: ')
+                while int(select) not in [0, 1] or (int(select) == 0 and player.money < player.location.cost):
+                    select = input('Invalid input. Input again: ')
+            if user and select == '0':
                 player.buy(player.location)
                 player.update_whole_set()
+            else:
+                if player.money >= player.location.cost:
+                    player.buy(player.location)
+                    player.update_whole_set()
+        # 'player' lands on own property
+        elif player.location.owner is player:
+            if user: "Your property!"
+            pass
         # 'player' lands on an owned proprety
         else:
             # 'player' pays no rent if the property is mortaged
@@ -657,6 +752,7 @@ class Game:
             else:
                 rent = player.location.rent
             if not player.pay_to(player.location.owner, rent):
+                if user: print("Pay ", str(rent), " to Player ", str(player.location.owner.number))
                 if not player.debt(rent): 
                     self.dies(player, player.location.owner)
                     return False
@@ -666,7 +762,7 @@ class Game:
     
 
 def main(limit_turns, game_mode=None, player_modes=None):
-    #print('Welcome to Monopoly!')
+    print('Welcome to Monopoly!')
 
     game = Game(game_mode, player_modes) # creates game
 
@@ -674,6 +770,16 @@ def main(limit_turns, game_mode=None, player_modes=None):
 
     while game.players_alive > 1 and game.total_turns < limit_turns:
         curr_player = game.turn_order[turn]
+        
+        # User == True refrers to single player mode (e.g. user inputs)
+        if game.mode == 1 and curr_player.number == 1:
+            user = True
+        else:
+            user = False
+    
+        if user:
+            print("You have $", str(curr_player.money))
+            print("You own these properties: ", ', '.join([name[p.number] for p in curr_player.properties]))
 
         #print(curr_player.location.number)
 
@@ -693,37 +799,62 @@ def main(limit_turns, game_mode=None, player_modes=None):
         #print(rolls)
 
         for roll in rolls:
+            if user: print("You rolled a ", str(roll))
             game.property_count[curr_player.location.number] += 1
 
             # checks if 'curr_player' received 3 consecutive doubles. If so, 'curr_player' is sent to jail
             if roll == -1:
+                if user: print("You rolled three doubles in a row. Go to Jail!")
                 curr_player.go_to_jail(game.Jail)
                 break
             
             # checks if 'curr_player' begins their turn imprisoned.
             if curr_player.imprisoned:
+                if user: print("You are currently inprisoned.")
                 if len(rolls) == 1: # first roll is not a double
-                    # 'curr_player' will first try to use a Get ouf of Jail Free Card
-                    if len(curr_player.jail_card) > 0:
-                        if 'cc' in curr_player.jail_card:
-                            curr_player.jail_card.remove('cc')
-                            game.cc.jail = False
-                        else:
-                            curr_player.jail_card.remove('chance')
-                            game.ch.jail = False
-                    # 'curr_player' will then, if able, pay $50 to leave jail
-                    elif curr_player.money > 50:
+                    if user:
+                        print('You have currently ', str(len(curr_player.jail_card)), 'Get of Jail Free Cards.')
+                        select = input('Select 0 to use a Get out of Jail Free card, 1 to pay $50 to leave jail, or 2 to remain in jail: ')
+                        while int(select) not in [0, 1, 2] or select == '0' and str(len(curr_player.jail_card)) == 0 or curr_player.imprisoned_count == 2 and select == '2':
+                            select = input('Invalid input. Please select again: ')
+
+                        if int(select) == 0:
+                            if 'cc' in curr_player.jail_card:
+                                curr_player.jail_card.remove('cc')
+                                game.cc.jail = False
+                            else:
+                                curr_player.jail_card.remove('chance')
+                                game.ch.jail = False
+                        elif int(select) == 1:
+                            if not curr_player.debt(50): # if 'curr_player' is unable to pay the $50
+                                game.dies(curr_player)
+                                break
                             curr_player.money -= 50
-                    # if this is the third turn 'curr_player' is imprisoned, they are then forced to liquidate assets and pay $50 to leave jail, or declare bankruptcy
-                    elif curr_player.imprisoned_count == 2:
-                        if not curr_player.debt(50): # if 'curr_player' is unable to pay the $50
-                            game.dies(curr_player)
+                        elif int(select) == 2:
+                            curr_player.imprisoned_count += 1
                             break
-                        curr_player.money -= 50
-                    # 'curr_player" can not leave prison, but is not forced too either
                     else:
-                        curr_player.imprisoned_count += 1
-                        break
+                        # 'curr_player' will first try to use a Get ouf of Jail Free Card
+                        if len(curr_player.jail_card) > 0:
+                            if 'cc' in curr_player.jail_card:
+                                curr_player.jail_card.remove('cc')
+                                game.cc.jail = False
+                            else:
+                                curr_player.jail_card.remove('chance')
+                                game.ch.jail = False
+                        # 'curr_player' will then, if able, pay $50 to leave jail
+                        elif curr_player.money > 50:
+                                curr_player.money -= 50
+                        # if this is the third turn 'curr_player' is imprisoned, they are then forced to liquidate assets and pay $50 to leave jail, or declare bankruptcy
+                        elif curr_player.imprisoned_count == 2:
+                            if not curr_player.debt(50): # if 'curr_player' is unable to pay the $50
+                                game.dies(curr_player)
+                                break
+                            curr_player.money -= 50
+                        # 'curr_player" can not leave prison, but is not forced too either
+                        else:
+                            curr_player.imprisoned_count += 1
+                            break
                 curr_player.imprisoned = False
                 curr_player.imprisoned_count = 0
 
@@ -731,15 +862,18 @@ def main(limit_turns, game_mode=None, player_modes=None):
             for _ in range(roll):
                 curr_player.location = curr_player.location.next
                 if curr_player.location == game.Go: # 'curr_player' receives $200 for passing go
+                    if user: print("You passed Go!")
                     curr_player.money += 200
 
 
-            if not game.land_on_location(curr_player, roll):
+            if not game.land_on_location(curr_player, roll, user):
                 break
         
         # 'curr_player'' now has opporuinity to build unmortage properties and build houses/hotels
         if curr_player in game.players:
-            game.end_turn(curr_player)
+            game.end_turn(curr_player, user)
+        elif user:
+            print("You declared bankruptcy. Game over!")
 
         # turn count is not updated for next player
         turn += 1
@@ -754,8 +888,8 @@ def main(limit_turns, game_mode=None, player_modes=None):
     #return game.property_count
     return winner.number
     
-#if __name__ == '__main__':
-   # main(250)
+if __name__ == '__main__':
+   main(250)
 
 
 
