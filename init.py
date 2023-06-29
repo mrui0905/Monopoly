@@ -501,7 +501,7 @@ class Game:
         return True
     
     # Conducts trades if suitable to all parties and keeps player above their limit
-    def trade(self, player, limit):
+    def trade(self, player, limit, user=False):
         # Edge case: player has no properties
         if not player.properties:
             return
@@ -512,6 +512,90 @@ class Game:
         # Check for how many sets 'player' is missing only one property from completing
         master_list = {'Brown':2, 'Light Blue':3, 'Purple':3, 'Orange':3, 'Red':3, 'Yellow':3, 'Green':3, 'Dark Blue':2, 'Utility':2}
         player_list = {set:0 for set in master_list}
+        
+        if user:
+            while True:
+                nums = [p.number for p in player.properties]
+                print("Here is a list of all your properties:")
+                for p in player.properties:
+                    print(str(p.number) + ':', name[p.number])
+
+                tp = input('Select a number to trade or -1 to skip: ')
+                while tp != '-1' and int(tp) not in nums:
+                    tp = input('Invalid input. Input again: ')
+
+                if tp == '-1':
+                    return
+                
+                print("Here is a list of all properties and their owners:")
+                curr = self.Go
+
+                possible_trades = []
+                for i in range(40):
+                    curr = curr.next
+                    if curr.unowned: 
+                        continue
+                    if curr.owner.number == player.number:
+                        curr = curr.next
+                        continue
+
+                    print(name[curr.number], '('+str(curr.number)+')', "Owner is Player", curr.owner.number)
+                    possible_trades.append(curr.number)
+                    curr = curr.next
+                    
+                other_property = input('Select a number to trade for or -1 to skip: ')
+                while other_property != '-1' and int(other_property) not in possible_trades:
+                    other_property = input('Invalid input. Input again: ')
+
+                if other_property == '-1':
+                    return
+
+                while curr.number != int(other_property):
+                    curr = curr.next
+
+                traded_property = self.Go
+
+                while traded_property.number != int(tp):
+                    traded_property = traded_property.next
+                
+
+                # check if 'traded_property' will fill a set for other player
+                other_count = 0
+                for p in curr.owner.properties:
+                    if p.set == traded_property.set:
+                        other_count += 1
+
+                # calculates 'cash' amount that player will also pay to complete trade
+                if other_count + 1 == master_list[traded_property.set]:
+                    cash = curr.cost - traded_property.cost
+                else:
+                    cash = 2 * curr.cost - traded_property.cost
+
+                # if player doesn't have enough money, trade is prevented
+                if player.money - cash < limit:
+                    print("Trade partner depands too much money. Try a new trade!")
+                    break
+                
+                # traded_property switches owner
+                traded_property.owner = curr.owner
+
+                player.properties.remove(traded_property)
+                curr.owner.properties.add(traded_property)
+
+                # money is exchanged
+                player.money -= cash
+                curr.owner.money += cash
+
+                # curr switches owner
+                curr.owner = player
+                player.properties.add(curr)
+                traded_property.owner.properties.remove(curr)
+
+                print("You traded", name[traded_property.number], "and -$" + str(cash), "for", name[curr.number])
+
+            return
+
+        
 
         for property in player.properties:
             if property.whole_set:
@@ -604,7 +688,7 @@ class Game:
         limit = int(player.money * ratio)
 
         # Player initiates trades
-        self.trade(player, limit)
+        self.trade(player, limit, user)
 
         not_monopoly = set() # creates set of properties not in a monopoly (will include railroads and utilites)
         is_monopoly = set() # creates set of properties in a monopoly

@@ -32,6 +32,7 @@ class Player:
     def buy(self, property):
         self.money -= property.cost
         self.properties.add(property)
+        property.unowned = False
         property.owner = self
 
         self.update_whole_set() # updates monopolies 'self' owns
