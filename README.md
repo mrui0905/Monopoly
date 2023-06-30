@@ -5,6 +5,14 @@ This repository includes a simulation of Monopoly, as well as three studies into
 All studies are done in jupyter notebook files, game engine is written in .py files, data refrenced in studies is 
 stored in data folder
 
+**Instructions**
+
+When not intending to simualte (then the main() method in init.py should be called with parameters), you will be prompted for the following:
+- Number of players. If single player mode, the user will always be Player 1.
+- Gamemode (0 is simulation mode, 1 is single-player mode)
+- Aggression level- determines how aggressive CPU will be in terms of trades and buying houses/properties. Can be custom set when simulating,
+but defaults to Default (0.5), Aggressive (0.85), and Conservative (0.15).
+
 **Key Monopoly Assumptions:**
 
 Purchasing Logic:
