@@ -415,6 +415,11 @@ class Game:
                     player.money += 200
 
             if player.location.unowned:
+                if user:
+                    print("This property is unowned. It costs $" + str(player.location.cost) + ". Do you wish to buy?")
+                    select = input('Select 0 to buy, 1 to not buy: ')
+                    while int(select) not in [0, 1] or (int(select) == 0 and player.money < player.location.cost):
+                        select = input('Invalid input. Input again: ')
                 if player.money >= player.location.cost:
                     player.buy(player.location)
                     player.update_whole_set()
@@ -435,6 +440,11 @@ class Game:
                     player.money += 200
 
             if player.location.unowned:
+                if user:
+                    print("This property is unowned. It costs $" + str(player.location.cost) + ". Do you wish to buy?")
+                    select = input('Select 0 to buy, 1 to not buy: ')
+                    while int(select) not in [0, 1] or (int(select) == 0 and player.money < player.location.cost):
+                        select = input('Invalid input. Input again: ')
                 if player.money >= player.location.cost:
                     player.buy(player.location)
                     player.update_whole_set()
