@@ -626,6 +626,8 @@ class Game:
         # Initiating possible trades 
         if missing_two_list and missing_one:
             for _ in range(40):
+                if not missing_two_list:
+                    break
                 # Suitable property to be traded : 'curr'
                 if curr.set in missing_one and not curr.unowned and curr.owner is not player:
                     traded_property = missing_two_list.pop() # property that will be traded for 'curr'
@@ -646,7 +648,18 @@ class Game:
                     if player.money - cash < limit:
                         missing_two_list.append(traded_property)
                         continue
-                    
+
+                    if self.mode == 1 and curr.owner.number == 1:
+                        print("Player", player.number, "porposes to trade", name[traded_property.number], "and $" + str(cash) + " for", name[curr.number])
+                        decide = input('Input 0 to accept trade or 1 to reject trade: ')
+                        while int(decide) not in [0,1]:
+                            decide = input('Invalid input. Input again: ')
+
+                        if int(decide) == 1:
+                            continue
+
+                        print("Trade complete!")
+
                     # traded_property switches owner
                     traded_property.owner = curr.owner
 
@@ -705,10 +718,21 @@ class Game:
         # Create list of lists of monopolies, sorted by highest cost to lowest cost
         lst_is_monopoly = [sorted([property for property in is_monopoly if property.set == s], key = lambda x:(-x.cost)) for s in total_sets]
 
+        ask = False
         # Unmortage as many properties as we can
         for s in lst_is_monopoly:
             for property in s:
                 if property.mortaged:
+                    if user: 
+                        if not ask:
+                            ask = True
+                            user_mortage = input('You have mortaged propreties. Would you like to unmortage them? Input 0 for yes, 1 for no: ')
+                            while user_mortage not in ['0', '1']:
+                                user_mortage = input('Invalid input. Input again: ')
+
+                            if user_mortage == '1':
+                                break
+                    
                     if not player.unmortage(property, limit):
                         break
         
@@ -716,8 +740,21 @@ class Game:
         lst_is_monopoly = [[property for property in is_monopoly if property.set == s] for s in total_sets]
         lst_is_monopoly = lst_is_monopoly[::-1]
 
+        ask_houses = False
         # Purchas as many houses/hotels as possible
         for s in lst_is_monopoly:
+            if not s:
+                continue
+            if user:
+                if not ask_houses:
+                    ask_houses = True
+                    user_houses = input('You have monopolies. Would you like to build houses? Input 0 for yes, 1 for no: ')
+                    while user_houses not in ['0', '1']:
+                        user_houses = input('Invalid input. Input again: ')
+
+                    if user_houses == '1':
+                        break
+
             mortaged = False     
             hp = []
 
@@ -752,6 +789,18 @@ class Game:
 
         for property in lst_not_monopoly:
             if property.mortaged:
+                if user:
+                    if ask:
+                        if user_mortage == '1':
+                            break
+                    else:
+                        ask = True
+                        user_mortage = input('You have mortaged propreties. Would you like to unmortage them? Input 0 for yes, 1 for no: ')
+                        while user_mortage not in ['0', '1']:
+                            user_mortage = input('Invalid input. Input again: ')
+
+                        if user_mortage == '1':
+                            break
                 if not player.unmortage(property, limit):
                     break
                         
@@ -899,7 +948,7 @@ def main(limit_turns, game_mode=None, player_modes=None):
                     if user:
                         print('You have currently ', str(len(curr_player.jail_card)), 'Get of Jail Free Cards.')
                         select = input('Select 0 to use a Get out of Jail Free card, 1 to pay $50 to leave jail, or 2 to remain in jail: ')
-                        while int(select) not in [0, 1, 2] or select == '0' and str(len(curr_player.jail_card)) == 0 or curr_player.imprisoned_count == 2 and select == '2':
+                        while int(select) not in [0, 1, 2] or (select == '0' and str(len(curr_player.jail_card)) == 0) or curr_player.imprisoned_count == 2 and select == '2':
                             select = input('Invalid input. Please select again: ')
 
                         if int(select) == 0:
@@ -965,7 +1014,8 @@ def main(limit_turns, game_mode=None, player_modes=None):
         game.total_turns += 1
 
     winner = sorted(game.players, key = lambda x:-x.money)[0]
-    #print('Winner is Player', winner.number)
+    
+    if game.mode == 1: print('Winner is Player', winner.number)
     #print('Total number of turns: ', game.total_turns)
     #for player in game.players:
         #print('Player ' + str(player.number) + ' had $' + str(player.money))
